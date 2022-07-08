@@ -1,0 +1,9 @@
+button {
+    cursor: pointer;
+}
+
+* {
+    margin: 0;
+    font-family: Tahoma!important;
+    overflow: hidden;
+}
