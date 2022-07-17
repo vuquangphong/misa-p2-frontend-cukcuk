@@ -4,6 +4,11 @@ export const enumCukcuk = {
         put: 1,
     },
 
+    appearOnMenu: {
+        appear: 0,
+        notAppear: 1,
+    },
+
     customizeStatusCode: {
         getOkay: 10,
         created: 11,

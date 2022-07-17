@@ -107,18 +107,15 @@
         kết quả
       </div>
     </div>
+
+    <MenuFoodList v-show="false" ref="foodList" />
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-// import Paginate from "vuejs-paginate-next";
 
 export default {
-  //   components: {
-  //     paginate: Paginate,
-  //   },
-
   computed: {
     ...mapGetters([
       "totalRecordsInPage",
@@ -131,7 +128,7 @@ export default {
   data() {
     return {
       isOpen: false,
-      valueOfInput: 10,
+      valueOfInput: 100,
       pageSizeOptions: [
         { selected: true, value: 10 },
         { selected: false, value: 50 },
@@ -168,7 +165,7 @@ export default {
       if (this.pageIndex !== 1) {
         this.changePageIndex(1);
       } else {
-        this.changePageIndex(0);
+        this.$refs.foodList.getFoodPaging();
       }
     },
 
@@ -335,6 +332,7 @@ export default {
 }
 
 .options-container {
+  box-shadow: rgb(136 136 136) 0px 1px 8px;
   position: absolute;
   bottom: 26px;
   left: 0.5px;

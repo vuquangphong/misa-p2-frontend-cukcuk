@@ -19,7 +19,7 @@ export default {
     unitFilter: '',
     priceFilter: '',
     pageIndex: 1,
-    pageSize: 10,
+    pageSize: 100,
     totalPages: 0,
     totalRecordsInPage: 0,
 };

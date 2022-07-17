@@ -1,17 +1,18 @@
 <template>
   <div class="input-container">
-    <div :class="{ inputLabel: true, focus: isFocus, alert: true }">
+    <div :class="{ inputLabel: true, focus: isFocus, alert: isCompulsory }">
       <input
         type="text"
         :value="valueOfInput"
         @input="changeValue"
-        ref="input"
+        @focusin="focusinEvent"
+        @focusout="focusoutEvent"
       />
     </div>
 
     <div
       class="required-alert"
-      v-if="true"
+      v-if="isCompulsory"
       @mouseover="isShowAlert = true"
       @mouseleave="isShowAlert = false"
     >
@@ -28,9 +29,22 @@
 
 <script>
 import { resourceCukcuk } from "@/utils/resourceCukcuk";
+import { mapGetters } from "vuex";
 
 export default {
-  props: ["valueOfInput", "isFoodName", "isFoodCode", "isAlert"],
+  props: [
+    "valueOfInput",
+    "isFoodName",
+    "isFoodCode",
+    "isFoodPrice",
+    "isAlert",
+    "isCompulsory",
+    "clearForPost",
+  ],
+
+  computed: {
+    ...mapGetters(["isOpenFormDetail"]),
+  },
 
   data() {
     return {
@@ -49,6 +63,25 @@ export default {
     changeValue(event) {
       this.currentValue = event.target.value;
       this.$emit("changeValue", this.currentValue);
+    },
+
+    /**
+     * Event focus in input
+     * Author: VQPhong (17/07/2022)
+     */
+    focusinEvent() {
+      this.isFocus = true;
+      if (this.isCompulsory) {
+        this.$emit("focusRemoveAlert", null);
+      }
+    },
+
+    /**
+     * Event focus out input
+     * Author: VQPhong (17/07/2022)
+     */
+    focusoutEvent() {
+      this.isFocus = false;
     },
   },
 };
@@ -69,6 +102,10 @@ export default {
   border-color: #c1c1c1 #d9d9d9 #d9d9d9;
   color: #000;
   font-weight: normal;
+}
+
+.inputLabel.focus {
+  border-color: #0071c1;
 }
 
 .inputLabel.alert {

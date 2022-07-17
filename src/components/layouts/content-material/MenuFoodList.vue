@@ -1,5 +1,5 @@
 <template>
-  <div class="menu-food-list-container">
+  <div class="menu-food-list-container" ref="menuFoodList">
     <div class="grid-view">
       <table>
         <thead>
@@ -10,7 +10,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseComboboxHeader :valueInput="filterFoodType" />
+                  <BaseComboboxHeader :valueInput="filterFoodType" ref="test" />
                 </div>
               </div>
             </th>
@@ -132,6 +132,8 @@
             v-for="(data, index) in dataFoodPaging"
             :key="index"
             :class="{ evenRow: index % 2 === 1, selected: data.Selected }"
+            @click="chooseFood(data)"
+            @dblclick="displayFood(data)"
           >
             <td class="text-align-left">{{ foodTypeDefault }}</td>
             <td class="text-align-left">{{ data.FoodCode }}</td>
@@ -157,8 +159,6 @@
 
 <script>
 import { resourceCukcuk } from "@/utils/resourceCukcuk";
-import { fakeData } from "@/utils/constants";
-
 import BaseComboboxHeader from "@/components/base/BaseComboboxHeader.vue";
 import BaseFilterHeader from "../../base/BaseFilterHeader.vue";
 import FoodFormDetail from "../../../pages/menu-food/FoodFormDetail.vue";
@@ -200,7 +200,6 @@ export default {
       filterFoodType: "Tất cả",
       filterStopSell: "Không",
       foodTypeDefault: "Món ăn",
-      tempData: fakeData,
       errorUserMsg: resourceCukcuk.VI.message.generalErrMsg,
     };
   },
@@ -250,9 +249,16 @@ export default {
           res.data.customStatusCode === enumCukcuk.customizeStatusCode.getOkay
         ) {
           res.data.responseData.Data.forEach((food, index) => {
-            index === 0
-              ? (food["Selected"] = true)
-              : (food["Selected"] = false);
+            if (index === 0) {
+              food["Selected"] = true;
+              cur.changeCurrentFood({
+                FoodID: food["FoodID"],
+                FoodCode: food["FoodCode"],
+                FoodName: food["FoodName"],
+              });
+            } else {
+              food["Selected"] = false;
+            }
           });
 
           cur.loadDataFoodPaging(res.data.responseData.Data);
@@ -272,12 +278,51 @@ export default {
       }
     },
 
+    /**
+     * Event click on 1 row of the grid
+     * Author: VQPhong (17/07/2022)
+     */
+    chooseFood({ FoodID, FoodCode, FoodName, Selected }) {
+      this.changeCurrentFood("");
+      this.changeCurrentFood({ FoodID, FoodCode, FoodName });
+
+      if (!Selected) {
+        let checkBreak = 0;
+        for (const food of this.dataFoodPaging) {
+          if (food.Selected) {
+            food.Selected = false;
+            checkBreak++;
+            if (checkBreak >= 2) break;
+            else continue;
+          }
+
+          if (food.FoodID === FoodID) {
+            food.Selected = true;
+            checkBreak++;
+            if (checkBreak >= 2) break;
+            else continue;
+          }
+        }
+      }
+    },
+
+    /**
+     * Event double click on 1 row of the grid
+     * Author: VQPhong (17/07/2022)
+     */
+    displayFood({ FoodID, FoodCode, FoodName, Selected }) {
+      this.chooseFood({ FoodID, FoodCode, FoodName, Selected });
+      this.openFormDetail();
+    },
+
     ...mapActions([
       "controlLoader",
       "loadDataFoodPaging",
       "changeTotalPages",
       "changeCurrentTotalNumberFood",
       "changeTotalRecordsInPage",
+      "changeCurrentFood",
+      "openFormDetail",
     ]),
   },
 };

@@ -14,7 +14,7 @@ export const resourceCukcuk = {
         menuList: {
             menuFood: 'Thực đơn',
         },
-        
+
         tableHeader: {
             foodType: 'Loại món',
             foodCode: 'Mã món',
@@ -42,6 +42,7 @@ export const resourceCukcuk = {
             titleFormAdd: 'Thêm món',
             generalTab: 'Thông tin chung',
             favorServiceTab: 'Sở thích phục vụ',
+            titleAlertDel: 'CUKCUK - Quản lý nhà hàng',
         },
 
         buttons: {

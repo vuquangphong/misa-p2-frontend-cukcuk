@@ -17,6 +17,12 @@
 <script>
 export default {
   props: ["valueInput"],
+
+  methods: {
+    test() {
+      alert("test ref");
+    },
+  },
 };
 </script>
 

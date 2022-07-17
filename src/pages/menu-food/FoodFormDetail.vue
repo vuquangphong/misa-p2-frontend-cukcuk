@@ -41,7 +41,11 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseInput />
+                        <BaseInput
+                          :isFoodName="true"
+                          :isCompulsory="isEmptyName"
+                          @changeValue="formInfo.FoodName = $event"
+                        />
                       </div>
                     </div>
 
@@ -53,7 +57,11 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseInput />
+                        <BaseInput
+                          :isFoodCode="true"
+                          :isCompulsory="isEmptyCode"
+                          @changeValue="formInfo.FoodCode = $event"
+                        />
                       </div>
                     </div>
 
@@ -76,7 +84,10 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseComboBoxDetail />
+                        <BaseComboBoxDetail
+                          :isFoodUnit="true"
+                          :isCompulsory="isEmptyUnit"
+                        />
                       </div>
                     </div>
 
@@ -88,7 +99,11 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseInput />
+                        <BaseInput
+                          :isFoodPrice="true"
+                          :isCompulsory="isEmptyPrice"
+                          @changeValue="formInfo.FoodPrice = $event"
+                        />
                       </div>
                     </div>
 
@@ -99,7 +114,9 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseInput />
+                        <BaseInput
+                          @changeValue="formInfo.FoodInvest = $event"
+                        />
                       </div>
                     </div>
 
@@ -111,7 +128,11 @@
                       </div>
                       <div class="input">
                         <div class="text-area">
-                          <textarea name="" id=""></textarea>
+                          <textarea
+                            name=""
+                            id=""
+                            @changeValue="formInfo.Description = $event"
+                          ></textarea>
                         </div>
                       </div>
                     </div>
@@ -176,7 +197,9 @@
                 </div>
               </div>
 
-              <div class="main-body-favor-service" v-show="!isGeneralTab"></div>
+              <div class="main-body-favor-service" v-show="!isGeneralTab">
+                Tính năng đang phát triển!
+              </div>
             </div>
           </div>
         </div>
@@ -224,6 +247,7 @@ import { resourceCukcuk } from "@/utils/resourceCukcuk";
 import { mapActions, mapGetters } from "vuex";
 import BaseInput from "../../components/base/BaseInput.vue";
 import BaseComboBoxDetail from "@/components/base/BaseComboBoxDetail.vue";
+import { enumCukcuk } from "@/utils/enumCukcuk";
 
 export default {
   components: { BaseInput, BaseComboBoxDetail },
@@ -248,6 +272,23 @@ export default {
       guideAvatar1: resourceCukcuk.VI.tableHeader.guideChooseAvatar1,
       guideAvatar2: resourceCukcuk.VI.tableHeader.guideChooseAvatar2,
       symbol: resourceCukcuk.VI.tableHeader.symbol,
+
+      formInfo: {
+        FoodName: "",
+        FoodCode: "",
+        FoodGroupID: "",
+        FoodUnitID: "",
+        FoodPrice: 0,
+        FoodInvest: 0,
+        Description: "",
+        FoodPlace: "",
+        Appear: enumCukcuk.appearOnMenu.appear,
+      },
+
+      isEmptyName: false,
+      isEmptyCode: false,
+      isEmptyUnit: false,
+      isEmptyPrice: false,
     };
   },
 
@@ -669,6 +710,12 @@ fieldset {
 
 .remove-img img {
   width: 11px;
-  /* height: 16px; */
+}
+
+.main-body-favor-service {
+  padding-top: 200px;
+  text-align: center;
+  font-weight: 600;
+  font-size: x-large;
 }
 </style>

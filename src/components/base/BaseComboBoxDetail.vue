@@ -40,6 +40,7 @@ export default {
     "isFoodUnit",
     "isFoodPlace",
     "isAlert",
+    "isCompulsory"
   ],
 
   data() {

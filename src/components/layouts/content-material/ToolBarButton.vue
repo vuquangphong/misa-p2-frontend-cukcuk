@@ -4,23 +4,49 @@
       <BaseButtonToolBar
         :title="btnAdd"
         :isAddition="true"
-        @eventButton="openFormDetail"
+        @eventButton="eventOpenForAdd"
       />
+
       <BaseButtonToolBar :title="btnReplica" :isReplica="true" />
-      <BaseButtonToolBar :title="btnEdit" :isModification="true" />
-      <BaseButtonToolBar :title="btnDelete" :isDelete="true" />
+
+      <BaseButtonToolBar
+        :title="btnEdit"
+        :isModification="true"
+        @eventButton="eventOpenForModify"
+      />
+
+      <BaseButtonToolBar
+        :title="btnDelete"
+        :isDelete="true"
+        @eventButton="eventDelete"
+      />
+
       <div class="tool-bar-separator"></div>
-      <BaseButtonToolBar :title="btnReload" :isReload="true" />
+
+      <BaseButtonToolBar
+        :title="btnReload"
+        :isReload="true"
+        @eventButton="eventReload"
+      />
     </div>
+
+    <MenuFoodList v-show="false" ref="foodList" />
+    <BaseAlertDelete />
   </div>
 </template>
 
 <script>
 import BaseButtonToolBar from "@/components/base/BaseButtonToolBar.vue";
 import { resourceCukcuk } from "../../../utils/resourceCukcuk";
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
+import BaseAlertDelete from "@/components/base/BaseAlertDelete.vue";
+
 export default {
-  components: { BaseButtonToolBar },
+  components: { BaseButtonToolBar, BaseAlertDelete },
+
+  computed: {
+    ...mapGetters(["currentFood", "dataFoodPaging"]),
+  },
 
   data() {
     return {
@@ -33,7 +59,62 @@ export default {
   },
 
   methods: {
-    ...mapActions(["openFormDetail"]),
+    /**
+     * Event add button
+     * Author: VQPhong (17/07/2022)
+     */
+    eventOpenForAdd() {
+      this.changeCurrentFood(false);
+      this.openFormDetail();
+    },
+
+    /**
+     * Event modify button
+     * Author: VQPhong (17/07/2022)
+     */
+    eventOpenForModify() {
+      this.resetCurrentFood();
+      this.openFormDetail();
+    },
+
+    /**
+     * Event delete button
+     * Author: VQPhong (17/07/2022)
+     */
+    eventDelete() {
+      this.resetCurrentFood();
+      this.openAlertDelete();
+    },
+
+    /**
+     * Event reload button
+     * Author: VQPhong (17/07/2022)
+     */
+    eventReload() {
+      this.$refs.foodList.getFoodPaging();
+    },
+
+    /**
+     * Reset currentFood if false
+     * Author: VQPhong (17/07/2022)
+     */
+    resetCurrentFood() {
+      if (!this.currentFood) {
+        for (const food of this.dataFoodPaging) {
+          if (food.Selected) {
+            this.changeCurrentFood({
+              FoodID: food.FoodID,
+              FoodCode: food.FoodCode,
+              FoodName: food.FoodName,
+            });
+
+            break;
+          }
+        }
+      }
+    },
+
+    ...mapActions(["openFormDetail", "changeCurrentFood", "openAlertDelete"]),
   },
 };
 </script>
