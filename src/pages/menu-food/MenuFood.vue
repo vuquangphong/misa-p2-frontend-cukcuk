@@ -11,6 +11,10 @@
     <div class="content-panel-container">
       <ContentPanel />
     </div>
+
+    <div class="loader">
+      <BaseLoader />
+    </div>
   </div>
 </template>
 
@@ -18,9 +22,20 @@
 import ContentPanel from "@/components/layouts/ContentPanel.vue";
 import MenuNav from "@/components/layouts/MenuNav.vue";
 import HeaderBar from "@/components/layouts/HeaderBar.vue";
+import BaseLoader from '../../components/base/BaseLoader.vue';
 
 export default {
-  components: { ContentPanel, MenuNav, HeaderBar },
+  /**
+   * Call API FoodGroup, FoodUnit and FoodPlace to Vuex
+   * Author: VQPhong (16/07/2022)
+   */
+  mounted() {
+    this.$store.dispatch("getFoodGroup");
+    this.$store.dispatch("getFoodUnit");
+    this.$store.dispatch("getFoodPlace");
+  },
+
+  components: { ContentPanel, MenuNav, HeaderBar, BaseLoader },
 };
 </script>
 
@@ -31,7 +46,7 @@ export default {
   padding: 0;
   border: 0 none;
   overflow: hidden;
-  position: static;
+  position: relative;
   touch-action: none;
 }
 
@@ -50,16 +65,16 @@ export default {
   left: 0px;
   top: 55px;
   margin: 0px;
-  height: 684px;
+  height: calc(100vh);
 }
 
 .content-panel-container {
-  right: auto;
   left: 230px;
   top: 55px;
   margin: 0px;
-  height: 684px;
-  width: 925px;
-  background: #fff !important;
+  height: calc(100vh);
+  width: calc(100vw - 230px);
+  background: #fff;
+  position: absolute;
 }
 </style>

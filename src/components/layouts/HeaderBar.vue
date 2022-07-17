@@ -20,7 +20,7 @@ export default {
 <style scoped>
 .container {
   height: 55px;
-  width: 1536px;
+  width: 100%;
   left: 0px;
   top: 0px;
   background-color: #0973b9;

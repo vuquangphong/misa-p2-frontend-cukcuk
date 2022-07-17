@@ -1,8 +1,9 @@
 import { createApp } from 'vue'
-import App from './App.vue'
-import router from './routers'
 import { createStore } from 'vuex'
-import storeConfig from './vuex'
+import App from './App.vue'
+import storeConfig from './redux/index'
+import router from './routers'
+import Paginate from 'vuejs-paginate-next'
 
 const store = createStore(storeConfig)
 
@@ -10,4 +11,5 @@ const app = createApp(App)
 
 app.use(store)
 app.use(router)
+app.use(Paginate)
 app.mount('#app')

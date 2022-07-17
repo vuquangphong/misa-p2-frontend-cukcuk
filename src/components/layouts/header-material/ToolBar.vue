@@ -40,8 +40,7 @@ export default {
 .tool-bar-container {
   margin: 0px;
   height: 55px;
-  right: auto;
-  left: 1033px;
+  right: 0;
   top: 0px;
   width: 620px;
   margin-right: 8px !important;
@@ -54,6 +53,7 @@ export default {
   overflow: hidden;
   position: relative;
   display: flex;
+  justify-content: flex-end;
 }
 
 .notification {
