@@ -130,9 +130,9 @@ export default {
       isOpen: false,
       valueOfInput: 100,
       pageSizeOptions: [
-        { selected: true, value: 10 },
+        { selected: false, value: 10 },
         { selected: false, value: 50 },
-        { selected: false, value: 100 },
+        { selected: true, value: 100 },
       ],
     };
   },

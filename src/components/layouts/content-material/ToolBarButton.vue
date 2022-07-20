@@ -7,7 +7,11 @@
         @eventButton="eventOpenForAdd"
       />
 
-      <BaseButtonToolBar :title="btnReplica" :isReplica="true" />
+      <BaseButtonToolBar
+        :title="btnReplica"
+        :isReplica="true"
+        @eventButton="eventOpenForReplica"
+      />
 
       <BaseButtonToolBar
         :title="btnEdit"
@@ -69,6 +73,16 @@ export default {
     },
 
     /**
+     * Event replica button
+     * Author: VQPhong (17/07/2022)
+     */
+    eventOpenForReplica() {
+      this.resetCurrentFood();
+      this.beingReplication();
+      this.openFormDetail();
+    },
+
+    /**
      * Event modify button
      * Author: VQPhong (17/07/2022)
      */
@@ -114,7 +128,12 @@ export default {
       }
     },
 
-    ...mapActions(["openFormDetail", "changeCurrentFood", "openAlertDelete"]),
+    ...mapActions([
+      "openFormDetail",
+      "changeCurrentFood",
+      "openAlertDelete",
+      "beingReplication",
+    ]),
   },
 };
 </script>

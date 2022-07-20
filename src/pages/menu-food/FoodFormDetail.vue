@@ -41,11 +41,38 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseInput
-                          :isFoodName="true"
-                          :isCompulsory="isEmptyName"
-                          @changeValue="formInfo.FoodName = $event"
-                        />
+                        <div class="input-container">
+                          <div
+                            :class="{
+                              inputLabel: true,
+                              focus: isFocusName,
+                              alert: isEmptyName,
+                            }"
+                          >
+                            <input
+                              type="text"
+                              v-model="formInfo.FoodName"
+                              @focusin="focusinEvent('Name', true)"
+                              @focusout="focusoutEvent('Name', true)"
+                              ref="firstInput"
+                            />
+                          </div>
+
+                          <div
+                            class="required-alert"
+                            v-if="isEmptyName"
+                            @mouseover="isShowAlertName = true"
+                            @mouseleave="isShowAlertName = false"
+                          >
+                            <div class="alert-icon"></div>
+                            <div class="alert-hover" v-show="isShowAlertName">
+                              <div class="alert-hover-inside">
+                                <div class="icon"></div>
+                                <div class="message">{{ alertRequired }}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -57,11 +84,37 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseInput
-                          :isFoodCode="true"
-                          :isCompulsory="isEmptyCode"
-                          @changeValue="formInfo.FoodCode = $event"
-                        />
+                        <div class="input-container">
+                          <div
+                            :class="{
+                              inputLabel: true,
+                              focus: isFocusCode,
+                              alert: isEmptyCode,
+                            }"
+                          >
+                            <input
+                              type="text"
+                              v-model="formInfo.FoodCode"
+                              @focusin="focusinEvent('Code', true)"
+                              @focusout="focusoutEvent('Code', true)"
+                            />
+                          </div>
+
+                          <div
+                            class="required-alert"
+                            v-if="isEmptyCode"
+                            @mouseover="isShowAlertCode = true"
+                            @mouseleave="isShowAlertCode = false"
+                          >
+                            <div class="alert-icon"></div>
+                            <div class="alert-hover" v-show="isShowAlertCode">
+                              <div class="alert-hover-inside">
+                                <div class="icon"></div>
+                                <div class="message">{{ alertRequired }}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -72,7 +125,54 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseComboBoxDetail />
+                        <div class="combo-container">
+                          <div
+                            :class="{
+                              comboLabel: true,
+                              focus: isFocusGroup,
+                            }"
+                          >
+                            <input
+                              type="text"
+                              readonly
+                              v-model="formInfo.FoodGroup.Name"
+                              @focusin="focusinEvent('Group', false)"
+                              @blur="focusoutEvent('Group', false)"
+                              ref="inputGroup"
+                            />
+
+                            <div
+                              class="drop-down"
+                              @click="eventDropDown('Group')"
+                            ></div>
+
+                            <div
+                              class="add-trigger"
+                              @click="eventAddTrigger('Group')"
+                            ></div>
+                          </div>
+
+                          <div
+                            class="shadowOption"
+                            v-show="isOptionGroup"
+                          ></div>
+
+                          <div class="expandOption" v-show="isOptionGroup">
+                            <div class="option-container">
+                              <div
+                                v-for="(option, index) in foodGroup"
+                                :key="index"
+                              >
+                                <div
+                                  class="option"
+                                  @click="chooseOptionCombo(option, 'Group')"
+                                >
+                                  {{ option.FoodGroupName }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -84,10 +184,67 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseComboBoxDetail
-                          :isFoodUnit="true"
-                          :isCompulsory="isEmptyUnit"
-                        />
+                        <div class="combo-container">
+                          <div
+                            :class="{
+                              comboLabel: true,
+                              focus: isFocusUnit,
+                              alert: isShowAlertUnit,
+                            }"
+                          >
+                            <input
+                              type="text"
+                              readonly
+                              v-model="formInfo.FoodUnit.Name"
+                              @focusin="focusinEvent('Unit', true)"
+                              @blur="focusoutEvent('Unit', true)"
+                              ref="inputUnit"
+                            />
+
+                            <div
+                              class="drop-down"
+                              @click="eventDropDown('Unit')"
+                            ></div>
+
+                            <div
+                              class="add-trigger"
+                              @click="eventAddTrigger('Unit')"
+                            ></div>
+                          </div>
+
+                          <div
+                            class="required-alert"
+                            v-if="isShowAlertUnit"
+                            @mouseover="isShowAlertUnit = true"
+                            @mouseleave="isShowAlertUnit = false"
+                          >
+                            <div class="alert-icon"></div>
+                            <div class="alert-hover" v-show="isShowAlertUnit">
+                              <div class="alert-hover-inside">
+                                <div class="icon"></div>
+                                <div class="message">{{ alertRequired }}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div class="shadowOption" v-show="isOptionUnit"></div>
+
+                          <div class="expandOption" v-show="isOptionUnit">
+                            <div class="option-container">
+                              <div
+                                v-for="(option, index) in foodUnit"
+                                :key="index"
+                              >
+                                <div
+                                  class="option"
+                                  @click="chooseOptionCombo(option, 'Unit')"
+                                >
+                                  {{ option.FoodUnitName }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -99,11 +256,38 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseInput
-                          :isFoodPrice="true"
-                          :isCompulsory="isEmptyPrice"
-                          @changeValue="formInfo.FoodPrice = $event"
-                        />
+                        <div class="input-container">
+                          <div
+                            :class="{
+                              inputLabel: true,
+                              focus: isFocusPrice,
+                              alert: isEmptyPrice,
+                            }"
+                          >
+                            <input
+                              type="text"
+                              class="number"
+                              v-model="formInfo.FoodPrice"
+                              @focusin="focusinEvent('Price', true)"
+                              @focusout="focusoutEvent('Price', true)"
+                            />
+                          </div>
+
+                          <div
+                            class="required-alert"
+                            v-if="isEmptyPrice"
+                            @mouseover="isShowAlertPrice = true"
+                            @mouseleave="isShowAlertPrice = false"
+                          >
+                            <div class="alert-icon"></div>
+                            <div class="alert-hover" v-show="isShowAlertPrice">
+                              <div class="alert-hover-inside">
+                                <div class="icon"></div>
+                                <div class="message">{{ alertRequired }}</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -114,9 +298,22 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseInput
-                          @changeValue="formInfo.FoodInvest = $event"
-                        />
+                        <div class="input-container">
+                          <div
+                            :class="{
+                              inputLabel: true,
+                              focus: isFocusInvest,
+                            }"
+                          >
+                            <input
+                              class="number"
+                              type="text"
+                              v-model="formInfo.FoodInvest"
+                              @focusin="focusinEvent('Invest', false)"
+                              @focusout="focusoutEvent('Invest', false)"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -126,12 +323,14 @@
                           <span>{{ labels.description }}</span>
                         </div>
                       </div>
-                      <div class="input">
-                        <div class="text-area">
+                      <div :class="{ input: true, focus: isFocusDescription }">
+                        <div class="textArea">
                           <textarea
                             name=""
                             id=""
-                            @changeValue="formInfo.Description = $event"
+                            v-model="formInfo.Description"
+                            @focusin="focusinEvent('Description', false)"
+                            @focusout="focusoutEvent('Description', false)"
                           ></textarea>
                         </div>
                       </div>
@@ -144,7 +343,52 @@
                         </div>
                       </div>
                       <div class="input">
-                        <BaseComboBoxDetail />
+                        <div class="combo-container">
+                          <div
+                            :class="{
+                              comboLabel: true,
+                              focus: isFocusPlace,
+                            }"
+                          >
+                            <input
+                              type="text"
+                              readonly
+                              v-model="formInfo.FoodPlace.Name"
+                              @focusin="focusinEvent('Place', false)"
+                              @blur="focusoutEvent('Place', false)"
+                              ref="inputPlace"
+                            />
+
+                            <div
+                              class="drop-down"
+                              @click="eventDropDown('Place')"
+                            ></div>
+
+                            <div
+                              class="add-trigger"
+                              @click="eventAddTrigger('Place')"
+                            ></div>
+                          </div>
+
+                          <div
+                            class="expandOption foodPlace"
+                            v-show="isOptionPlace"
+                          >
+                            <div class="option-container">
+                              <div
+                                v-for="(option, index) in foodPlace"
+                                :key="index"
+                              >
+                                <div
+                                  class="option"
+                                  @click="chooseOptionCombo(option, 'Place')"
+                                >
+                                  {{ option.FoodPlaceName }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -216,13 +460,13 @@
             </div>
 
             <div class="right-buttons">
-              <div class="button">
+              <div class="button" @click="eventStoreBtn">
                 <div class="store-btn">
                   <span class="icon"></span>
                   <span class="title">{{ btnStore }}</span>
                 </div>
               </div>
-              <div class="button">
+              <div class="button" @click="eventStoreAndAddBtn">
                 <div class="store-add-btn">
                   <span class="icon"></span>
                   <span class="title">{{ btnStoreAndAdd }}</span>
@@ -239,25 +483,71 @@
         </div>
       </div>
     </div>
+
+    <DuplicatedMessage
+      :isAlert="isAlertDuplicatedCode"
+      :currentCode="formInfo.FoodCode"
+      @closeMessage="isAlertDuplicatedCode = false"
+    />
   </div>
 </template>
 
 <script>
+import DuplicatedMessage from "./DuplicatedMessage.vue";
 import { resourceCukcuk } from "@/utils/resourceCukcuk";
 import { mapActions, mapGetters } from "vuex";
-import BaseInput from "../../components/base/BaseInput.vue";
-import BaseComboBoxDetail from "@/components/base/BaseComboBoxDetail.vue";
 import { enumCukcuk } from "@/utils/enumCukcuk";
+import { reactive, toRefs } from "vue";
+import { createModel } from "@/utils/call_apis/Post";
+import { updateModelById } from "@/utils/call_apis/Put";
+import { requireFoodFields } from "@/utils/constants";
+import { getAll, getById } from "@/utils/call_apis/Get";
 
 export default {
-  components: { BaseInput, BaseComboBoxDetail },
+  components: { DuplicatedMessage },
+
+  setup() {
+    const state = reactive({
+      formInfo: {
+        FoodName: "",
+        FoodCode: "",
+        FoodGroup: {
+          Name: "",
+          ID: "",
+        },
+        FoodUnit: {
+          Name: "",
+          ID: "",
+        },
+        FoodPrice: 0,
+        FoodInvest: 0,
+        Description: "",
+        FoodPlace: {
+          Name: "",
+          ID: "",
+        },
+        Appear: enumCukcuk.appearOnMenu.appear,
+      },
+    });
+
+    return { ...toRefs(state) };
+  },
 
   computed: {
-    ...mapGetters(["isOpenFormDetail"]),
+    ...mapGetters([
+      "isOpenFormDetail",
+      "foodGroup",
+      "foodUnit",
+      "foodPlace",
+      "pageIndex",
+      "currentFood",
+      "isReplication",
+    ]),
   },
 
   data() {
     return {
+      alertRequired: resourceCukcuk.VI.message.alertRequired,
       formTitle: resourceCukcuk.VI.formLabels.titleFormAdd,
       isGeneralTab: true,
       generalTab: resourceCukcuk.VI.formLabels.generalTab,
@@ -272,24 +562,81 @@ export default {
       guideAvatar1: resourceCukcuk.VI.tableHeader.guideChooseAvatar1,
       guideAvatar2: resourceCukcuk.VI.tableHeader.guideChooseAvatar2,
       symbol: resourceCukcuk.VI.tableHeader.symbol,
+      alertErrorMsg: resourceCukcuk.VI.message.generalErrMsg,
+      modeAction: enumCukcuk.modeAction.post,
 
-      formInfo: {
-        FoodName: "",
-        FoodCode: "",
-        FoodGroupID: "",
-        FoodUnitID: "",
-        FoodPrice: 0,
-        FoodInvest: 0,
-        Description: "",
-        FoodPlace: "",
-        Appear: enumCukcuk.appearOnMenu.appear,
-      },
+      alertInterrupt: false,
+      currentCodeForUpdate: "",
+      isAlertDuplicatedCode: false,
 
       isEmptyName: false,
       isEmptyCode: false,
       isEmptyUnit: false,
       isEmptyPrice: false,
+
+      isFocusName: false,
+      isFocusCode: false,
+      isFocusPrice: false,
+      isFocusInvest: false,
+      isFocusDescription: false,
+      isFocusGroup: false,
+      isFocusUnit: false,
+      isFocusPlace: false,
+
+      isShowAlertName: false,
+      isShowAlertCode: false,
+      isShowAlertPrice: false,
+      isShowAlertUnit: false,
+
+      isOptionGroup: false,
+      isOptionUnit: false,
+      isOptionPlace: false,
     };
+  },
+
+  watch: {
+    /**
+     * Alter some states when Form Detail closed
+     * Author: VQPhong (19/07/2022)
+     */
+    isOpenFormDetail(value) {
+      if (!value) {
+        this.clearForm();
+        this.isGeneralTab = true;
+      }
+    },
+
+    /**
+     * Watch isReplica
+     * If true => change mode action to post
+     * Author: VQPhong (20/07/2022)
+     */
+    isReplication(value) {
+      if (value) {
+        this.modeAction = enumCukcuk.modeAction.post;
+      }
+    },
+
+    /**
+     * Alter some states when Current Food being changed
+     * Author: PhongVQ (11/02/2022)
+     */
+    async currentFood(value) {
+      if (!value) {
+        this.clearForm();
+        this.modeAction = enumCukcuk.modeAction.post;
+      } else {
+        await this.bindingFoodInfo(this.currentFood.FoodID);
+
+        if (this.isReplication) {
+          this.modeAction = enumCukcuk.modeAction.post;
+          this.stopReplication();
+        } else {
+          this.modeAction = enumCukcuk.modeAction.put;
+          this.currentCodeForUpdate = this.currentFood.FoodCode;
+        }
+      }
+    },
   },
 
   methods: {
@@ -301,7 +648,260 @@ export default {
       alert(this.msgNoFunction);
     },
 
-    ...mapActions(["closeFormDetail"]),
+    /**
+     * Event focus in input
+     * Author: VQPhong (17/07/2022)
+     */
+    focusinEvent(field, required) {
+      this[`isFocus${field}`] = true;
+
+      // Remove alert if it exists
+      if (required) {
+        this[`isEmpty${field}`] = false;
+      }
+    },
+
+    /**
+     * Event focus out input
+     * Author: VQPhong (17/07/2022)
+     */
+    focusoutEvent(field, required) {
+      this[`isFocus${field}`] = false;
+
+      // Check if required field is empty
+      if (required) {
+        if (!this.formInfo[`Food${field}`]) {
+          this[`isEmpty${field}`] = true;
+        }
+      }
+    },
+
+    /**
+     * Event click drop down btn in combobox
+     * Author: VQPhong (19/07/2022)
+     */
+    eventDropDown(field) {
+      this.$refs[`input${field}`].focus();
+      this[`isOption${field}`] = !this[`isOption${field}`];
+    },
+
+    /**
+     * Event add new option in combobox
+     * Author: VQPhong (19/07/2022)
+     */
+    // TODO: eventAddTrigger(field) {...}
+
+    /**
+     * Event choose 1 option of combobox
+     * Author: VQPhong (19/07/2022)
+     */
+    chooseOptionCombo(option, field) {
+      this[`isOption${field}`] = false;
+      this.formInfo[`Food${field}`].Name = option[`Food${field}Name`];
+      this.formInfo[`Food${field}`].ID = option[`Food${field}ID`];
+    },
+
+    /**
+     * Event store button
+     * Author: VQPhong (18/07/2022)
+     */
+    async eventStoreBtn() {
+      await this.addNewOrUpdateFood();
+      if (!this.alertInterrupt) {
+        this.closeFormDetail();
+      }
+    },
+
+    /**
+     * Event store and add button
+     * Author: VQPhong (18/07/2022)
+     */
+    async eventStoreAndAddBtn() {
+      await this.addNewOrUpdateFood();
+      if (!this.alertInterrupt) {
+        this.modeAction = enumCukcuk.modeAction.post;
+        this.clearForm();
+        // clearForPost...
+      }
+    },
+
+    /**
+     * Add a new Food / Update current Food
+     * Author: PhongVQ (18/07/2022)
+     */
+    async addNewOrUpdateFood() {
+      const cur = this;
+
+      cur.alertInterrupt = false;
+
+      let formPost = {
+        FoodName: cur.formInfo.FoodName,
+        FoodCode: cur.formInfo.FoodCode,
+        FoodGroupID: cur.formInfo.FoodGroup.ID,
+        FoodUnitID: cur.formInfo.FoodUnit.ID,
+        FoodPrice: cur.formInfo.FoodPrice,
+        FoodInvest: cur.formInfo.FoodInvest,
+        Description: cur.formInfo.Description,
+        FoodPlaceID: cur.formInfo.FoodPlace.ID,
+      };
+
+      // Validate Compulsory field
+      requireFoodFields.forEach((field) => {
+        if (!formPost[`Food${field}`]) {
+          cur[`isEmpty${field}`] = true;
+          cur.alertInterrupt = true;
+        }
+      });
+
+      if (cur.alertInterrupt) return;
+
+      // Check if FoodCode is duplicated
+      if (cur.modeAction === enumCukcuk.modeAction.put) {
+        if (formPost.FoodCode !== this.currentCodeForUpdate) {
+          if (await cur.isDuplicatedCode(formPost.FoodCode)) {
+            cur.alertInterrupt = true;
+            cur.isAlertDuplicatedCode = true;
+            return;
+          }
+        }
+      } else {
+        if (await cur.isDuplicatedCode(formPost.FoodCode)) {
+          cur.alertInterrupt = true;
+          cur.isAlertDuplicatedCode = true;
+          return;
+        }
+      }
+
+      // Everything is Okay
+      try {
+        cur.controlLoader();
+
+        if (cur.modeAction === enumCukcuk.modeAction.post) {
+          const res = await createModel("v1", "Foods", formPost);
+
+          if (
+            res.data.customStatusCode === enumCukcuk.customizeStatusCode.created
+          ) {
+            // Reload List of menu food
+            cur.$emit("reloadForAdd", null);
+
+            // Remove the interruptions
+            cur.alertInterrupt = false;
+          }
+        } else {
+          const res = await updateModelById(
+            "v1",
+            "Foods",
+            cur.currentFood.FoodID,
+            formPost
+          );
+
+          if (
+            res.data.customStatusCode === enumCukcuk.customizeStatusCode.updated
+          ) {
+            // Reload List of menu food
+            cur.$emit("reloadForUpdate", null);
+
+            // Remove the interruptions
+            cur.alertInterrupt = false;
+          }
+        }
+
+        cur.controlLoader();
+      } catch (err) {
+        cur.controlLoader();
+        alert(cur.alertErrorMsg);
+        console.log(err);
+      }
+    },
+
+    /**
+     * Clear all field from form detail
+     * Author: VQPhong (18/07/2022)
+     */
+    clearForm() {
+      const cur = this;
+
+      Object.keys(cur.formInfo).forEach((key) => {
+        if (key === "FoodPrice" || key === "FoodInvest") {
+          this.formInfo[key] = 0;
+        } else if (key === "Appear") {
+          this.formInfo[key] = enumCukcuk.appearOnMenu.appear;
+        } else if (
+          key === "FoodGroup" ||
+          key === "FoodUnit" ||
+          key === "FoodPlace"
+        ) {
+          this.formInfo[key].Name = "";
+          this.formInfo[key].ID = "";
+        } else {
+          this.formInfo[key] = "";
+        }
+      });
+    },
+
+    /**
+     * Get a food's info using FoodID,
+     * Binding received data into the form.
+     * Author: VQPhong (19/07/2022)
+     */
+    async bindingFoodInfo(id) {
+      const cur = this;
+
+      try {
+        const res = await getById("v1", "Foods", id);
+
+        // Format some fields
+        // if (cur.isReplication)... TODO
+
+        // Binding
+        Object.keys(cur.formInfo).forEach((key) => {
+          if (
+            key === "FoodGroup" ||
+            key === "FoodUnit" ||
+            key === "FoodPlace"
+          ) {
+            cur.formInfo[key].Name = res.data.responseData[`${key}Name`];
+            cur.formInfo[key].ID = res.data.responseData[`${key}ID`];
+          } else {
+            cur.formInfo[key] = res.data.responseData[key];
+          }
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    /**
+     * Check if the FoodCode is duplicated.
+     * Author: VQPhong (19/07/2022)
+     */
+    async isDuplicatedCode(currentCode) {
+      try {
+        const res = await getAll("v1", "Foods");
+
+        if (
+          res.data.customStatusCode === enumCukcuk.customizeStatusCode.getOkay
+        ) {
+          for (const food of res.data.responseData) {
+            if (food.FoodCode === currentCode) {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    ...mapActions([
+      "closeFormDetail",
+      "controlLoader",
+      "changePageIndex",
+      "stopReplication",
+    ]),
   },
 };
 </script>
@@ -330,6 +930,10 @@ export default {
   min-width: 740px;
   background-color: #fff;
   border: 5px solid #0072bc;
+}
+
+input.number {
+  text-align: right;
 }
 
 .form-header {
@@ -467,7 +1071,11 @@ export default {
   border-color: #c1c1c1 #d9d9d9 #d9d9d9;
 }
 
-.x-field.description .input .text-area {
+.x-field.description .input.focus {
+  border-color: #0071c1;
+}
+
+.x-field.description .input .textArea {
   padding: 3px 5px 3px;
 }
 
@@ -717,5 +1325,189 @@ fieldset {
   text-align: center;
   font-weight: 600;
   font-size: x-large;
+}
+
+.input-container {
+  height: 24px;
+  display: flex;
+}
+
+.inputLabel {
+  height: calc(100% - 2px);
+  width: 100%;
+  background-color: #fff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #c1c1c1 #d9d9d9 #d9d9d9;
+  color: #000;
+  font-weight: normal;
+}
+
+.inputLabel.focus {
+  border-color: #0071c1;
+}
+
+.inputLabel.alert {
+  width: calc(100% - 26px);
+  border-color: red;
+}
+
+.inputLabel input {
+  border: none;
+  outline: none;
+  width: calc(100% - 10px);
+  padding: 3px 5px;
+  font-size: 12px;
+  height: 16px;
+}
+
+.required-alert {
+  width: 26px;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.alert-icon {
+  width: 16px;
+  height: 16px;
+  margin: 0 5px 0 5px;
+  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/images/form/exclamation.png")
+    no-repeat;
+}
+
+.alert-hover {
+  z-index: 1;
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  min-width: 100px;
+  width: 231px;
+}
+
+.alert-hover .icon {
+  width: 16px;
+  height: 16px;
+  margin: 0 5px 0 5px;
+  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/images/form/exclamation.png")
+    no-repeat;
+}
+
+.alert-hover-inside {
+  border-radius: 3px;
+  padding: 7px 2px 7px 2px;
+  border: 1px solid #e1e1e1;
+  background-color: #eaf3fa;
+  display: flex;
+}
+
+.alert-hover .message {
+  font-size: 13px;
+}
+
+.combo-container {
+  display: flex;
+  position: relative;
+}
+
+.expandOption {
+  z-index: 1111;
+  position: absolute;
+  top: 24px;
+  left: 0;
+  width: calc(100% - 2px);
+  height: 300px;
+  max-height: 300px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #e1e1e1;
+  background: #fff;
+  color: #000;
+  font-size: 13px;
+}
+
+.expandOption.foodPlace {
+  height: auto;
+  max-height: 300px;
+}
+
+.shadowOption {
+  box-shadow: rgb(136 136 136) 0px 0px 6px;
+  top: 28px;
+  height: 297px;
+  width: 100%;
+  z-index: 1111;
+  position: absolute;
+  left: 0;
+  border-color: transparent;
+}
+
+.option-container {
+  height: 100%;
+  overflow: auto;
+}
+
+.expandOption.foodPlace .option-container {
+  height: auto;
+}
+
+.expandOption .option {
+  line-height: 22px;
+  padding: 0 6px;
+  border: 1px dotted transparent;
+  cursor: pointer;
+}
+
+.expandOption .option:hover {
+  background-color: #d6e8f6;
+  border-color: #d6e8f6;
+}
+
+.comboLabel {
+  display: flex;
+  height: calc(100% - 2px);
+  width: 100%;
+  background-color: #fff;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #c1c1c1 #d9d9d9 #d9d9d9;
+  color: #000;
+  font-weight: normal;
+}
+
+.comboLabel.focus {
+  border-color: #0071c1;
+}
+
+.comboLabel.alert {
+  border-color: red;
+}
+
+.comboLabel input {
+  border: none;
+  outline: none;
+  width: calc(100% - 54px);
+  padding: 3px 5px;
+  font-size: 12px;
+  height: 16px;
+}
+
+.drop-down {
+  background: #fff
+    url("https://cdn2-new.cukcuk.vn/QLNH/resources/images/form/trigger.png")
+    no-repeat 0 center;
+  width: 22px;
+  display: table-cell;
+  vertical-align: top;
+  cursor: pointer;
+}
+
+.add-trigger {
+  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/add-blue-icon.png")
+    no-repeat center center;
+  display: table-cell;
+  vertical-align: top;
+  cursor: pointer;
+  width: 22px;
 }
 </style>

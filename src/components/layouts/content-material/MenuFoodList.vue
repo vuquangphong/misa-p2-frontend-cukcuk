@@ -140,7 +140,7 @@
             <td class="text-align-left">{{ data.FoodName }}</td>
             <td class="text-align-left">{{ data.FoodGroup }}</td>
             <td class="text-align-left">{{ data.FoodUnit }}</td>
-            <td class="text-align-right">{{ data.FoodPrice }}</td>
+            <td class="text-align-right">{{ filterMoney(data.FoodPrice) }}</td>
             <td class="text-align-left">{{ data.ChangePrice }}</td>
             <td class="text-align-left">{{ data.AdjustPrice }}</td>
             <td class="text-align-left">{{ data.FeasureIngredient }}</td>
@@ -152,7 +152,10 @@
     </div>
 
     <div class="some-dialogs">
-      <FoodFormDetail />
+      <FoodFormDetail
+        @reloadForAdd="reloadForAdd"
+        @reloadForUpdate="getFoodPaging"
+      />
     </div>
   </div>
 </template>
@@ -279,6 +282,18 @@ export default {
     },
 
     /**
+     * Event reload table after adding new Food
+     * Author: VQPhong (18/07/2022)
+     */
+    async reloadForAdd() {
+      if (this.pageIndex !== 1) {
+        this.changePageIndex(1);
+      } else {
+        await this.getFoodPaging();
+      }
+    },
+
+    /**
      * Event click on 1 row of the grid
      * Author: VQPhong (17/07/2022)
      */
@@ -315,6 +330,21 @@ export default {
       this.openFormDetail();
     },
 
+    /**
+     * Filter money
+     * Author: VQPhong (19/07/2022)
+     */
+    filterMoney(value) {
+      value = Math.round(value);
+
+      const formatterVN = new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      });
+
+      return formatterVN.format(value).slice(0, -2);
+    },
+
     ...mapActions([
       "controlLoader",
       "loadDataFoodPaging",
@@ -322,6 +352,7 @@ export default {
       "changeCurrentTotalNumberFood",
       "changeTotalRecordsInPage",
       "changeCurrentFood",
+      "changePageIndex",
       "openFormDetail",
     ]),
   },

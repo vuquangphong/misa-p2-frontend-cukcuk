@@ -1,5 +1,7 @@
 export const apiUrl = 'http://localhost:33497/api/';
 
+export const requireFoodFields = ['Name', 'Code', 'UnitID', 'Price'];
+
 export const vi_enLowerChar = {
     à: "a", á: "a", ả: "a", ã: "a", ạ: "a",
     ă: "a", ằ: "a", ắ: "a", ẳ: "a", ẵ: "a", ặ: "a",

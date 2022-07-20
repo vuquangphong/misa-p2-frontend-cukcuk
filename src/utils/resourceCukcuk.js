@@ -40,6 +40,7 @@ export const resourceCukcuk = {
 
         formLabels: {
             titleFormAdd: 'Thêm món',
+            titleFormUpdate: 'Sửa món',
             generalTab: 'Thông tin chung',
             favorServiceTab: 'Sở thích phục vụ',
             titleAlertDel: 'CUKCUK - Quản lý nhà hàng',
