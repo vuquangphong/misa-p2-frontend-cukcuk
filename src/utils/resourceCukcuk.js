@@ -44,6 +44,8 @@ export const resourceCukcuk = {
             generalTab: 'Thông tin chung',
             favorServiceTab: 'Sở thích phục vụ',
             titleAlertDel: 'CUKCUK - Quản lý nhà hàng',
+            notSetup: 'Chưa thiết lập',
+            notAppearOnMenu: 'Không hiển thị trên thực đơn',
         },
 
         buttons: {

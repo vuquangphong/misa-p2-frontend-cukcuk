@@ -11,7 +11,7 @@
           <div class="content">
             Mã
             <span>&lt;{{ currentCode }}&gt;</span>
-            đã tồn tại trong danh sách món ăn.
+            đã tồn tại trong danh sách món ăn, vui lòng kiểm tra lại.
           </div>
         </div>
       </div>

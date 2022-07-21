@@ -71,18 +71,18 @@
 
         <div class="separator"></div>
 
-        <div class="page-size-options" @blur="isOpen = false">
+        <div class="page-size-options">
           <div :class="{ comboboxContainer: true, active: isOpen }">
             <div class="selected-option">
               <input type="text" disabled v-model="valueOfInput" />
             </div>
 
-            <div class="action" @click="isOpen = !isOpen">
+            <div class="action" @click="eventOpenOptions">
               <div class="action-dropdown"></div>
             </div>
           </div>
 
-          <div class="options-container" v-show="isOpen">
+          <div class="options-container" v-if="isOpen" v-click-outside="eventBlur">
             <div class="options-inside">
               <div
                 v-for="(option, index) in pageSizeOptions"
@@ -107,8 +107,6 @@
         kết quả
       </div>
     </div>
-
-    <MenuFoodList v-show="false" ref="foodList" />
   </div>
 </template>
 
@@ -128,6 +126,7 @@ export default {
   data() {
     return {
       isOpen: false,
+      isClickDropdown: false,
       valueOfInput: 100,
       pageSizeOptions: [
         { selected: false, value: 10 },
@@ -165,7 +164,7 @@ export default {
       if (this.pageIndex !== 1) {
         this.changePageIndex(1);
       } else {
-        this.$refs.foodList.getFoodPaging();
+        this.changeReloadFlag();
       }
     },
 
@@ -205,7 +204,27 @@ export default {
       this.changePageIndex(this.totalPages);
     },
 
-    ...mapActions(["changePageIndex", "changePageSize"]),
+    /**
+     * 
+     */
+    eventOpenOptions() {
+      this.isOpen = !this.isOpen;
+      this.isClickDropdown = true;
+    },
+
+    /**
+     * Event blur to hide options container
+     * Author: VQPhong (21/07/2022)
+     */
+    eventBlur() {
+      if (this.isClickDropdown) {
+        this.isClickDropdown = false;
+      } else {
+        this.isOpen = false;
+      }
+    },
+
+    ...mapActions(["changePageIndex", "changePageSize", "changeReloadFlag"]),
   },
 };
 </script>
@@ -335,7 +354,7 @@ export default {
   box-shadow: rgb(136 136 136) 0px 1px 8px;
   position: absolute;
   bottom: 26px;
-  left: 0.5px;
+  left: 0px;
   background-color: #fff;
   width: 100%;
   font-size: 13px;

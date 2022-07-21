@@ -4,6 +4,9 @@ export default {
     isAlertDeleteOpen: state => state.isAlertDeleteOpen,
     isReplication: state => state.isReplication,
     isReload: state => state.isReload,
+    isBinding: state => state.isBinding,
+    reloadFlag: state => state.reloadFlag,
+    isModify: state => state.isModify,
 
     currentFood: state => state.currentFood,
     currentTotalNumberFood: state => state.currentTotalNumberFood,

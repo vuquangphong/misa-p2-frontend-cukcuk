@@ -28,8 +28,6 @@
         </div>
       </div>
     </div>
-
-    <MenuFoodList v-show="false" ref="foodList" />
   </div>
 </template>
 
@@ -74,7 +72,7 @@ export default {
           res.data.customStatusCode === enumCukcuk.customizeStatusCode.deleted
         ) {
           cur.closeAlertDelete();
-          cur.$refs.foodList.getFoodPaging();
+          cur.changeReloadFlag();
         }
 
         cur.controlLoader();
@@ -86,7 +84,7 @@ export default {
       }
     },
 
-    ...mapActions(["closeAlertDelete", "controlLoader"]),
+    ...mapActions(["closeAlertDelete", "controlLoader", "changeReloadFlag"]),
   },
 };
 </script>
@@ -142,7 +140,7 @@ export default {
 }
 
 .body-inside .icon {
-  background-image: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/icon-question.png");
+  background-image: url("https://cdn2.cukcuk.vn/QLNH/resources/Image/icon-question.png");
   height: 32px;
   width: 32px;
   background-position: left top;

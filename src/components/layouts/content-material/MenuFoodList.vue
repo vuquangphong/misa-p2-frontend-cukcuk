@@ -138,14 +138,42 @@
             <td class="text-align-left">{{ foodTypeDefault }}</td>
             <td class="text-align-left">{{ data.FoodCode }}</td>
             <td class="text-align-left">{{ data.FoodName }}</td>
-            <td class="text-align-left">{{ data.FoodGroup }}</td>
-            <td class="text-align-left">{{ data.FoodUnit }}</td>
+            <td class="text-align-left">{{ data.FoodGroupName }}</td>
+            <td class="text-align-left">{{ data.FoodUnitName }}</td>
             <td class="text-align-right">{{ filterMoney(data.FoodPrice) }}</td>
-            <td class="text-align-left">{{ data.ChangePrice }}</td>
-            <td class="text-align-left">{{ data.AdjustPrice }}</td>
-            <td class="text-align-left">{{ data.FeasureIngredient }}</td>
-            <td class="text-align-left">{{ data.IsShow }}</td>
-            <td class="text-align-left">{{ data.StopSell }}</td>
+            <td class="text-align-left">
+              <div>
+                <img
+                  src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+                  :class="{ checkbox: true, active: false }"
+                />
+              </div>
+            </td>
+            <td class="text-align-left">
+              <div>
+                <img
+                  src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+                  :class="{ checkbox: true, active: false }"
+                />
+              </div>
+            </td>
+            <td class="text-align-left">{{ notSetup }}</td>
+            <td class="text-align-left">
+              <div>
+                <img
+                  src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+                  :class="{ checkbox: true, active: !data.Appear }"
+                />
+              </div>
+            </td>
+            <td class="text-align-left">
+              <div>
+                <img
+                  src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+                  :class="{ checkbox: true, active: false }"
+                />
+              </div>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -194,6 +222,7 @@ export default {
       "pageIndex",
       "pageSize",
       "dataFoodPaging",
+      "reloadFlag",
     ]),
   },
 
@@ -204,6 +233,7 @@ export default {
       filterStopSell: "Không",
       foodTypeDefault: "Món ăn",
       errorUserMsg: resourceCukcuk.VI.message.generalErrMsg,
+      notSetup: resourceCukcuk.VI.formLabels.notSetup,
     };
   },
 
@@ -221,6 +251,14 @@ export default {
      * Author: VQPhong (17/07/2022)
      */
     pageSize: function () {
+      this.getFoodPaging();
+    },
+
+    /**
+     * Call paging API again when active Reload button
+     * Author: VQPhong (17/07/2022)
+     */
+    reloadFlag: function () {
       this.getFoodPaging();
     },
   },
@@ -327,6 +365,9 @@ export default {
      */
     displayFood({ FoodID, FoodCode, FoodName, Selected }) {
       this.chooseFood({ FoodID, FoodCode, FoodName, Selected });
+      this.stopReplication();
+      this.beingModify();
+      this.changeIsBinding();
       this.openFormDetail();
     },
 
@@ -354,6 +395,9 @@ export default {
       "changeCurrentFood",
       "changePageIndex",
       "openFormDetail",
+      "changeIsBinding",
+      "stopReplication",
+      'beingModify'
     ]),
   },
 };
@@ -439,5 +483,23 @@ tbody tr.selected {
 
 tbody tr:hover {
   background-color: #e2eff8;
+}
+
+tbody td div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+tbody td img.checkbox {
+  opacity: 0.9;
+  width: 15px;
+  height: 15px;
+  background: url("https://cdn2.cukcuk.vn/QLNH/resources/images/form/checkbox.png")
+    0 0 no-repeat;
+}
+
+tbody td img.checkbox.active {
+  background-position: 0 -15px;
 }
 </style>

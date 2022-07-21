@@ -19,6 +19,18 @@ export default {
         state.isReload = isReload;
     },
 
+    setIsBinding(state, isBinding) {
+        state.isBinding = isBinding;
+    },
+
+    setReloadFlag(state, reloadFlag) {
+        state.reloadFlag = reloadFlag;
+    },
+
+    setIsModify(state, isModify) {
+        state.isModify = isModify;
+    },
+
     setCurrentFood(state, currentFood) {
         state.currentFood = currentFood;
     },

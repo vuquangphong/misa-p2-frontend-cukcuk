@@ -30,6 +30,21 @@ export default {
         commit('setIsReload', payload);
     },
 
+    changeIsBinding({ commit, getters }) {
+        commit('setIsBinding', !getters.isBinding);
+    },
+
+    changeReloadFlag({ commit, getters }) {
+        commit('setReloadFlag', !getters.reloadFlag);
+    },
+
+    beingModify({ commit }) {
+        commit('setIsModify', true);
+    },
+    stopModify({ commit }) {
+        commit('setIsModify', false);
+    },
+
     changeCurrentFood({ commit }, payload) {
         commit('setCurrentFood', payload);
     },

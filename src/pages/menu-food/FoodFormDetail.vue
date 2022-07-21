@@ -53,7 +53,10 @@
                               type="text"
                               v-model="formInfo.FoodName"
                               @focusin="focusinEvent('Name', true)"
-                              @focusout="focusoutEvent('Name', true)"
+                              @focusout="
+                                focusoutEvent('Name', true);
+                                blurInputName();
+                              "
                               ref="firstInput"
                             />
                           </div>
@@ -134,10 +137,9 @@
                           >
                             <input
                               type="text"
-                              readonly
                               v-model="formInfo.FoodGroup.Name"
                               @focusin="focusinEvent('Group', false)"
-                              @blur="focusoutEvent('Group', false)"
+                              @blur="isFocusGroup = false"
                               ref="inputGroup"
                             />
 
@@ -152,12 +154,13 @@
                             ></div>
                           </div>
 
-                          <div
-                            class="shadowOption"
-                            v-show="isOptionGroup"
-                          ></div>
+                          <div class="shadowOption" v-if="isOptionGroup"></div>
 
-                          <div class="expandOption" v-show="isOptionGroup">
+                          <div
+                            class="expandOption"
+                            v-if="isOptionGroup"
+                            v-click-outside="eventBlurGroup"
+                          >
                             <div class="option-container">
                               <div
                                 v-for="(option, index) in foodGroup"
@@ -188,16 +191,15 @@
                           <div
                             :class="{
                               comboLabel: true,
-                              focus: isFocusUnit,
-                              alert: isShowAlertUnit,
+                              focus: isFocusUnitID,
+                              alert: isEmptyUnitID,
                             }"
                           >
                             <input
                               type="text"
-                              readonly
                               v-model="formInfo.FoodUnit.Name"
-                              @focusin="focusinEvent('Unit', true)"
-                              @blur="focusoutEvent('Unit', true)"
+                              @focusin="focusinEvent('UnitID', true)"
+                              @blur="isFocusUnitID = false"
                               ref="inputUnit"
                             />
 
@@ -214,12 +216,12 @@
 
                           <div
                             class="required-alert"
-                            v-if="isShowAlertUnit"
-                            @mouseover="isShowAlertUnit = true"
-                            @mouseleave="isShowAlertUnit = false"
+                            v-if="isEmptyUnitID"
+                            @mouseover="isShowAlertUnitID = true"
+                            @mouseleave="isShowAlertUnitID = false"
                           >
                             <div class="alert-icon"></div>
-                            <div class="alert-hover" v-show="isShowAlertUnit">
+                            <div class="alert-hover" v-show="isShowAlertUnitID">
                               <div class="alert-hover-inside">
                                 <div class="icon"></div>
                                 <div class="message">{{ alertRequired }}</div>
@@ -227,9 +229,13 @@
                             </div>
                           </div>
 
-                          <div class="shadowOption" v-show="isOptionUnit"></div>
+                          <div class="shadowOption" v-if="isOptionUnit"></div>
 
-                          <div class="expandOption" v-show="isOptionUnit">
+                          <div
+                            class="expandOption"
+                            v-if="isOptionUnit"
+                            v-click-outside="eventBlurUnit"
+                          >
                             <div class="option-container">
                               <div
                                 v-for="(option, index) in foodUnit"
@@ -352,7 +358,6 @@
                           >
                             <input
                               type="text"
-                              readonly
                               v-model="formInfo.FoodPlace.Name"
                               @focusin="focusinEvent('Place', false)"
                               @blur="focusoutEvent('Place', false)"
@@ -372,7 +377,8 @@
 
                           <div
                             class="expandOption foodPlace"
-                            v-show="isOptionPlace"
+                            v-if="isOptionPlace"
+                            v-click-outside="eventBlurPlace"
                           >
                             <div class="option-container">
                               <div
@@ -389,6 +395,28 @@
                             </div>
                           </div>
                         </div>
+                      </div>
+                    </div>
+
+                    <div class="x-field appear-on-menu">
+                      <div class="label-input">
+                        <div class="label-input-inside">
+                          <span></span>
+                        </div>
+                      </div>
+                      <div class="input">
+                        <input
+                          type="button"
+                          :class="{
+                            checkbox: true,
+                            notAppear: formInfo.Appear >= 1,
+                          }"
+                          id="MISACheckboxFormDetail"
+                          @click="eventNotAppear"
+                        />
+                        <label for="MISACheckboxFormDetail">
+                          {{ notAppearOnMenu }}
+                        </label>
                       </div>
                     </div>
                   </div>
@@ -451,33 +479,33 @@
         <div class="form-footer">
           <div class="form-buttons">
             <div class="left-buttons">
-              <div class="button" @click="noFunction">
+              <button class="button" @click="noFunction">
                 <div class="help-btn">
                   <span class="icon"></span>
                   <span class="title">{{ btnHelp }}</span>
                 </div>
-              </div>
+              </button>
             </div>
 
             <div class="right-buttons">
-              <div class="button" @click="eventStoreBtn">
+              <button class="button" @click="eventStoreBtn">
                 <div class="store-btn">
                   <span class="icon"></span>
                   <span class="title">{{ btnStore }}</span>
                 </div>
-              </div>
-              <div class="button" @click="eventStoreAndAddBtn">
+              </button>
+              <button class="button" @click="eventStoreAndAddBtn">
                 <div class="store-add-btn">
                   <span class="icon"></span>
                   <span class="title">{{ btnStoreAndAdd }}</span>
                 </div>
-              </div>
-              <div class="button" @click="closeFormDetail">
+              </button>
+              <button class="button" @click="closeFormDetail">
                 <div class="cancel-btn">
                   <span class="icon"></span>
                   <span class="title">{{ btnCancel }}</span>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -502,6 +530,11 @@ import { createModel } from "@/utils/call_apis/Post";
 import { updateModelById } from "@/utils/call_apis/Put";
 import { requireFoodFields } from "@/utils/constants";
 import { getAll, getById } from "@/utils/call_apis/Get";
+import {
+  genCodeFromName,
+  filterFromMoney,
+  filterToMoney,
+} from "@/utils/commonFunc";
 
 export default {
   components: { DuplicatedMessage },
@@ -519,8 +552,8 @@ export default {
           Name: "",
           ID: "",
         },
-        FoodPrice: 0,
-        FoodInvest: 0,
+        FoodPrice: "0",
+        FoodInvest: "0",
         Description: "",
         FoodPlace: {
           Name: "",
@@ -542,6 +575,8 @@ export default {
       "pageIndex",
       "currentFood",
       "isReplication",
+      "isBinding",
+      "isModify",
     ]),
   },
 
@@ -564,6 +599,7 @@ export default {
       symbol: resourceCukcuk.VI.tableHeader.symbol,
       alertErrorMsg: resourceCukcuk.VI.message.generalErrMsg,
       modeAction: enumCukcuk.modeAction.post,
+      notAppearOnMenu: resourceCukcuk.VI.formLabels.notAppearOnMenu,
 
       alertInterrupt: false,
       currentCodeForUpdate: "",
@@ -571,7 +607,7 @@ export default {
 
       isEmptyName: false,
       isEmptyCode: false,
-      isEmptyUnit: false,
+      isEmptyUnitID: false,
       isEmptyPrice: false,
 
       isFocusName: false,
@@ -580,17 +616,24 @@ export default {
       isFocusInvest: false,
       isFocusDescription: false,
       isFocusGroup: false,
-      isFocusUnit: false,
+      isFocusUnitID: false,
       isFocusPlace: false,
 
       isShowAlertName: false,
       isShowAlertCode: false,
       isShowAlertPrice: false,
-      isShowAlertUnit: false,
+      isShowAlertUnitID: false,
 
       isOptionGroup: false,
       isOptionUnit: false,
       isOptionPlace: false,
+
+      tempAutoCode: "",
+      timeout: null,
+
+      isClickDropdownGroup: false,
+      isClickDropdownUnit: false,
+      isClickDropdownPlace: false,
     };
   },
 
@@ -599,11 +642,25 @@ export default {
      * Alter some states when Form Detail closed
      * Author: VQPhong (19/07/2022)
      */
-    isOpenFormDetail(value) {
+    isOpenFormDetail: function (value) {
       if (!value) {
         this.clearForm();
         this.isGeneralTab = true;
+      } else {
+        this.$refs.firstInput.focus();
       }
+
+      requireFoodFields.forEach((field) => {
+        this[`isEmpty${field}`] = false;
+      });
+    },
+
+    /**
+     * isBinding is changing <=> start bindingFoodInfo()
+     * Author: VQPhong (20/07/2022)
+     */
+    isBinding: function () {
+      this.bindingFoodInfo(this.currentFood.FoodID);
     },
 
     /**
@@ -611,9 +668,20 @@ export default {
      * If true => change mode action to post
      * Author: VQPhong (20/07/2022)
      */
-    isReplication(value) {
+    isReplication: function (value) {
       if (value) {
         this.modeAction = enumCukcuk.modeAction.post;
+      }
+    },
+
+    /**
+     * Watch isModify
+     * If true => change mode action to put
+     * Author: VQPhong (20/07/2022)
+     */
+    isModify: function (value) {
+      if (value) {
+        this.modeAction = enumCukcuk.modeAction.put;
       }
     },
 
@@ -621,21 +689,39 @@ export default {
      * Alter some states when Current Food being changed
      * Author: PhongVQ (11/02/2022)
      */
-    async currentFood(value) {
+    currentFood: async function (value) {
       if (!value) {
         this.clearForm();
         this.modeAction = enumCukcuk.modeAction.post;
       } else {
-        await this.bindingFoodInfo(this.currentFood.FoodID);
-
-        if (this.isReplication) {
-          this.modeAction = enumCukcuk.modeAction.post;
-          this.stopReplication();
-        } else {
-          this.modeAction = enumCukcuk.modeAction.put;
-          this.currentCodeForUpdate = this.currentFood.FoodCode;
-        }
+        this.currentCodeForUpdate = this.currentFood.FoodCode;
       }
+    },
+
+    /**
+     * Filter Money in Form Detail
+     * Author: VQPhong (20/07/2022)
+     */
+    "formInfo.FoodPrice": function (val) {
+      this.formInfo.FoodPrice = filterFromMoney(val);
+    },
+
+    "formInfo.FoodInvest": function (val) {
+      this.formInfo.FoodInvest = filterFromMoney(val);
+    },
+
+    /**
+     * Auto Generate FoodCode from FoodName
+     * Author: VQPhong (21/07/2022)
+     */
+    "formInfo.FoodName": function (val) {
+      const cur = this;
+
+      clearTimeout(cur.timeout);
+
+      cur.timeout = setTimeout(() => {
+        cur.tempAutoCode = genCodeFromName(val);
+      }, 100);
     },
   },
 
@@ -683,6 +769,7 @@ export default {
     eventDropDown(field) {
       this.$refs[`input${field}`].focus();
       this[`isOption${field}`] = !this[`isOption${field}`];
+      this[`isClickDropdown${field}`] = true;
     },
 
     /**
@@ -721,7 +808,7 @@ export default {
       if (!this.alertInterrupt) {
         this.modeAction = enumCukcuk.modeAction.post;
         this.clearForm();
-        // clearForPost...
+        this.$refs.firstInput.focus();
       }
     },
 
@@ -739,10 +826,11 @@ export default {
         FoodCode: cur.formInfo.FoodCode,
         FoodGroupID: cur.formInfo.FoodGroup.ID,
         FoodUnitID: cur.formInfo.FoodUnit.ID,
-        FoodPrice: cur.formInfo.FoodPrice,
-        FoodInvest: cur.formInfo.FoodInvest,
+        FoodPrice: filterToMoney(cur.formInfo.FoodPrice),
+        FoodInvest: filterToMoney(cur.formInfo.FoodInvest),
         Description: cur.formInfo.Description,
         FoodPlaceID: cur.formInfo.FoodPlace.ID,
+        Appear: cur.formInfo.Appear,
       };
 
       // Validate Compulsory field
@@ -824,7 +912,7 @@ export default {
 
       Object.keys(cur.formInfo).forEach((key) => {
         if (key === "FoodPrice" || key === "FoodInvest") {
-          this.formInfo[key] = 0;
+          this.formInfo[key] = "0";
         } else if (key === "Appear") {
           this.formInfo[key] = enumCukcuk.appearOnMenu.appear;
         } else if (
@@ -851,9 +939,6 @@ export default {
       try {
         const res = await getById("v1", "Foods", id);
 
-        // Format some fields
-        // if (cur.isReplication)... TODO
-
         // Binding
         Object.keys(cur.formInfo).forEach((key) => {
           if (
@@ -863,6 +948,33 @@ export default {
           ) {
             cur.formInfo[key].Name = res.data.responseData[`${key}Name`];
             cur.formInfo[key].ID = res.data.responseData[`${key}ID`];
+          } else if (key === "FoodInvest") {
+            !res.data.responseData[key]
+              ? (cur.formInfo[key] = 0)
+              : (cur.formInfo[key] = res.data.responseData[key]);
+          } else if (key === "FoodCode" && cur.isReplication) {
+            const wholeAutoCode = genCodeFromName(
+              res.data.responseData.FoodName,
+              true
+            );
+            const autoCode = genCodeFromName(
+              res.data.responseData.FoodName,
+              false
+            );
+
+            if (
+              res.data.responseData[key] !== wholeAutoCode &&
+              res.data.responseData[key] !== autoCode
+            ) {
+              cur.formInfo[key] = autoCode;
+            } else {
+              res.data.responseData[key] === autoCode
+                ? (cur.formInfo[key] = wholeAutoCode)
+                : (cur.formInfo[key] = autoCode);
+            }
+
+            cur.stopReplication();
+            cur.stopModify();
           } else {
             cur.formInfo[key] = res.data.responseData[key];
           }
@@ -896,11 +1008,73 @@ export default {
       }
     },
 
+    /**
+     * Auto binding Code only when Add New Food
+     * Author: VQPhong (21/07/2022)
+     */
+    blurInputName() {
+      if (
+        this.modeAction === enumCukcuk.modeAction.post &&
+        !this.isReplication
+      ) {
+        this.formInfo.FoodCode = this.tempAutoCode;
+      }
+    },
+
+    /**
+     * Event check box
+     */
+    eventNotAppear() {
+      if (this.formInfo.Appear) {
+        this.formInfo.Appear = enumCukcuk.appearOnMenu.appear;
+      } else {
+        this.formInfo.Appear = enumCukcuk.appearOnMenu.notAppear;
+      }
+    },
+
+    /**
+     * Event blur to hide group options
+     * Author: VQPhong (21/07/2022)
+     */
+    eventBlurGroup() {
+      if (this.isClickDropdownGroup) {
+        this.isClickDropdownGroup = false;
+      } else {
+        this.isOptionGroup = false;
+      }
+    },
+
+    /**
+     * Event blur to hide group options
+     * Author: VQPhong (21/07/2022)
+     */
+    eventBlurUnit() {
+      if (this.isClickDropdownUnit) {
+        this.isClickDropdownUnit = false;
+      } else {
+        this.isOptionUnit = false;
+      }
+    },
+
+    /**
+     * Event blur to hide group options
+     * Author: VQPhong (21/07/2022)
+     */
+    eventBlurPlace() {
+      if (this.isClickDropdownPlace) {
+        this.isClickDropdownPlace = false;
+      } else {
+        this.isOptionPlace = false;
+      }
+    },
+
     ...mapActions([
       "closeFormDetail",
       "controlLoader",
       "changePageIndex",
       "stopReplication",
+      "changeCurrentFood",
+      "stopModify",
     ]),
   },
 };
@@ -1123,6 +1297,12 @@ input.number {
 .form-buttons .button:hover {
   border-color: #0071c1;
   background-image: -webkit-linear-gradient(top, #eff0ee, #eff2e9);
+}
+
+.form-buttons .button:focus-visible {
+  background-image: -webkit-linear-gradient(top, #eff0ee, #eff2e9);
+  outline: none;
+  border-color: #0071c1;
 }
 
 .help-btn {
@@ -1509,5 +1689,39 @@ fieldset {
   vertical-align: top;
   cursor: pointer;
   width: 22px;
+}
+
+.appear-on-menu .input {
+  display: flex;
+  align-items: center;
+}
+
+.x-field .input input.checkbox {
+  background: url("https://cdn2.cukcuk.vn/QLNH/resources/images/form/checkbox.png")
+    no-repeat;
+  width: 15px;
+  height: 15px;
+  outline: none;
+  border: none;
+}
+
+.x-field .input input.checkbox:focus,
+.x-field .input input.checkbox:focus-visible {
+  background-position: -15px 0px;
+}
+
+.x-field .input input.checkbox.notAppear {
+  background-position: 0 -15px;
+}
+
+.x-field .input input.checkbox.notAppear:focus {
+  background-position: -15px -15px;
+}
+
+.x-field .input label {
+  padding-left: 5px;
+  color: #000;
+  font-size: 13px;
+  font-weight: normal;
 }
 </style>

@@ -34,7 +34,6 @@
       />
     </div>
 
-    <MenuFoodList v-show="false" ref="foodList" />
     <BaseAlertDelete />
   </div>
 </template>
@@ -49,7 +48,7 @@ export default {
   components: { BaseButtonToolBar, BaseAlertDelete },
 
   computed: {
-    ...mapGetters(["currentFood", "dataFoodPaging"]),
+    ...mapGetters(["currentFood", "dataFoodPaging", "isBinding"]),
   },
 
   data() {
@@ -79,6 +78,7 @@ export default {
     eventOpenForReplica() {
       this.resetCurrentFood();
       this.beingReplication();
+      this.changeIsBinding();
       this.openFormDetail();
     },
 
@@ -88,6 +88,8 @@ export default {
      */
     eventOpenForModify() {
       this.resetCurrentFood();
+      this.beingModify();
+      this.changeIsBinding();
       this.openFormDetail();
     },
 
@@ -105,7 +107,7 @@ export default {
      * Author: VQPhong (17/07/2022)
      */
     eventReload() {
-      this.$refs.foodList.getFoodPaging();
+      this.changeReloadFlag();
     },
 
     /**
@@ -133,6 +135,9 @@ export default {
       "changeCurrentFood",
       "openAlertDelete",
       "beingReplication",
+      "changeIsBinding",
+      "changeReloadFlag",
+      "beingModify",
     ]),
   },
 };

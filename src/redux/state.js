@@ -4,6 +4,9 @@ export default {
     isAlertDeleteOpen: false,
     isReplication: false,
     isReload: false,
+    isBinding: false,
+    reloadFlag: false,
+    isModify: false,
 
     currentFood: '',
     currentTotalNumberFood: 0,
