@@ -1,5 +1,5 @@
 <template>
-  <div class="msg-container" v-show="isAlert">
+  <div class="msg-container" v-if="isAlert">
     <div class="main-msg">
       <div class="header">
         <div class="title">{{ title }}</div>
@@ -8,10 +8,16 @@
       <div class="body">
         <div class="body-inside">
           <div class="icon"></div>
-          <div class="content">
+          <div class="content" v-if="isCode">
             Mã
             <span>&lt;{{ currentCode }}&gt;</span>
-            đã tồn tại trong danh sách món ăn, vui lòng kiểm tra lại.
+            đã tồn tại trong danh sách {{ model }}, vui lòng kiểm tra lại.
+          </div>
+
+          <div class="content" v-else>
+            {{model}}
+            <span>&lt;{{ currentCode }}&gt;</span>
+            đã tồn tại.
           </div>
         </div>
       </div>
@@ -28,7 +34,7 @@
 <script>
 import { resourceCukcuk } from "@/utils/resourceCukcuk";
 export default {
-  props: ["isAlert", "currentCode"],
+  props: ["isAlert", "currentCode", "model", 'isCode'],
 
   data() {
     return {
@@ -75,11 +81,8 @@ export default {
   padding-left: 2px;
 }
 
-.body {
-  height: 54px;
-}
-
 .body-inside {
+  height: 51px;
   padding: 10px;
   display: flex;
 }

@@ -30,17 +30,28 @@ export const resourceCukcuk = {
 
             foodInvest: 'Giá vốn',
             description: 'Mô tả',
+            descriptionExtra: 'Diễn giải',
             foodPlace: 'Chế biến tại',
             avatar: 'Ảnh đại diện',
 
             guideChooseAvatar1: 'Chọn các ảnh có định dạng',
             guideChooseAvatar2: '(.jpg, .jpeg, .png, .gif)',
             symbol: 'Biểu tượng',
+
+            groupCode: 'Mã nhóm',
+            groupName: 'Tên nhóm',
+
+            unitName: 'Đơn vị tính',
+
+            placeName: 'Nơi chế biến',
         },
 
         formLabels: {
             titleFormAdd: 'Thêm món',
             titleFormUpdate: 'Sửa món',
+            titleFormAddGroup: 'Thêm Nhóm thực đơn',
+            titleFormAddUnit: 'Thêm Đơn vị tính',
+            titleFormAddPlace: 'Thêm Bếp/Bar',
             generalTab: 'Thông tin chung',
             favorServiceTab: 'Sở thích phục vụ',
             titleAlertDel: 'CUKCUK - Quản lý nhà hàng',

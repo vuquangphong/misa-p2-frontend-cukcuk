@@ -3,7 +3,9 @@
     <div class="form-detail">
       <div class="form-header">
         <div class="form-header-inside">
-          <div class="form-title">{{ formTitle }}</div>
+          <div class="form-title">
+            {{ isModify ? formTitleUpdate : formTitleAdd }}
+          </div>
           <div class="form-close-btn">
             <div class="close-icon" @click="closeFormDetail"></div>
           </div>
@@ -515,7 +517,24 @@
     <DuplicatedMessage
       :isAlert="isAlertDuplicatedCode"
       :currentCode="formInfo.FoodCode"
+      :model="'món ăn'"
+      :isCode="true"
       @closeMessage="isAlertDuplicatedCode = false"
+    />
+
+    <AddGroupForm
+      :isOpenExtraForm="isGroupFormOpen"
+      @closeExtraForm="isGroupFormOpen = false"
+    />
+
+    <AddUnitForm
+      :isOpenExtraForm="isUnitFormOpen"
+      @closeExtraForm="isUnitFormOpen = false"
+    />
+
+    <AddPlaceForm 
+      :isOpenExtraForm="isPlaceFormOpen"
+      @closeExtraForm="isPlaceFormOpen = false"
     />
   </div>
 </template>
@@ -535,9 +554,12 @@ import {
   filterFromMoney,
   filterToMoney,
 } from "@/utils/commonFunc";
+import AddGroupForm from "./AddGroupForm.vue";
+import AddUnitForm from "./AddUnitForm.vue";
+import AddPlaceForm from './AddPlaceForm.vue';
 
 export default {
-  components: { DuplicatedMessage },
+  components: { DuplicatedMessage, AddGroupForm, AddUnitForm, AddPlaceForm, },
 
   setup() {
     const state = reactive({
@@ -583,7 +605,8 @@ export default {
   data() {
     return {
       alertRequired: resourceCukcuk.VI.message.alertRequired,
-      formTitle: resourceCukcuk.VI.formLabels.titleFormAdd,
+      formTitleAdd: resourceCukcuk.VI.formLabels.titleFormAdd,
+      formTitleUpdate: resourceCukcuk.VI.formLabels.titleFormUpdate,
       isGeneralTab: true,
       generalTab: resourceCukcuk.VI.formLabels.generalTab,
       favorServiceTab: resourceCukcuk.VI.formLabels.favorServiceTab,
@@ -635,6 +658,10 @@ export default {
       isClickDropdownGroup: false,
       isClickDropdownUnit: false,
       isClickDropdownPlace: false,
+
+      isGroupFormOpen: false,
+      isUnitFormOpen: false,
+      isPlaceFormOpen: false,
     };
   },
 
@@ -650,6 +677,7 @@ export default {
         cur.clearForm();
         cur.isGeneralTab = true;
         cur.stopReplication();
+        cur.stopModify();
       }
 
       clearTimeout(cur.timeoutOpenForm);
@@ -816,6 +844,7 @@ export default {
       if (!this.alertInterrupt) {
         this.modeAction = enumCukcuk.modeAction.post;
         this.clearForm();
+        this.stopModify();
         this.$refs.firstInput.focus();
       }
     },
@@ -841,7 +870,7 @@ export default {
         Appear: cur.formInfo.Appear,
       };
 
-      // Validate Compulsory field
+      // Validate Compulsory fields
       requireFoodFields.forEach((field) => {
         if (!formPost[`Food${field}`]) {
           cur[`isEmpty${field}`] = true;
@@ -980,8 +1009,6 @@ export default {
                 ? (cur.formInfo[key] = wholeAutoCode)
                 : (cur.formInfo[key] = autoCode);
             }
-
-            cur.stopModify();
           } else {
             cur.formInfo[key] = res.data.responseData[key];
           }
@@ -1073,6 +1100,14 @@ export default {
       } else {
         this.isOptionPlace = false;
       }
+    },
+
+    /**
+     * Open Form add Group, Unit, Place
+     * Author: VQPhong (22/07/2022)
+     */
+    eventAddTrigger(field) {
+      this[`is${field}FormOpen`] = true;
     },
 
     ...mapActions([
@@ -1615,7 +1650,8 @@ fieldset {
 
 .expandOption.foodPlace {
   height: auto;
-  max-height: 300px;
+  max-height: 150px;
+  overflow: auto;
 }
 
 .shadowOption {

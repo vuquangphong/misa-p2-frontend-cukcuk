@@ -56,15 +56,16 @@ export default {
     async getFoodGroup({ commit }) {
         try {
             const res = await getAll('v1', 'FoodGroups');
-            let foodGroupIDName = [];
+            let foodGroups = [];
             res.data.responseData.forEach(data => {
                 let element = {
                     FoodGroupID: data.FoodGroupID,
+                    FoodGroupCode: data.FoodGroupCode,
                     FoodGroupName: data.FoodGroupName,
                 };
-                foodGroupIDName.push(element);
+                foodGroups.push(element);
             });
-            commit('setFoodGroup', foodGroupIDName);
+            commit('setFoodGroup', foodGroups);
         } catch (err) {
             commit('setFoodGroup', []);
             console.log(err);

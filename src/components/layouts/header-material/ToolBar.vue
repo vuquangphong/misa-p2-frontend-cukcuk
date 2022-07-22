@@ -3,14 +3,14 @@
     <div class="tool-bar-body">
       <BaseComboboxToolBar :isChainStore="false" />
 
-      <div class="notification">
+      <div class="notification" @click="noFunction">
         <div class="icon-globe">
           <img src="../../../assets/imgs/icon-globe.png" alt="Global icon">
         </div>
       </div>
 
       <div class="misa-support">
-        <div class="support-icon"></div>
+        <div class="support-icon" @click="noFunction"></div>
       </div>
 
       <div class="user-setting">
@@ -30,9 +30,16 @@
 
 <script>
 import BaseComboboxToolBar from "@/components/base/BaseComboboxToolBar.vue";
+import { resourceCukcuk } from '@/utils/resourceCukcuk';
 
 export default {
   components: { BaseComboboxToolBar },
+
+  methods: {
+    noFunction() {
+      alert(resourceCukcuk.VI.message.noFunction);
+    }
+  }
 };
 </script>
 
@@ -57,6 +64,7 @@ export default {
 }
 
 .notification {
+  cursor: pointer;
   height: 55px;
   width: 65px;
   display: flex;
