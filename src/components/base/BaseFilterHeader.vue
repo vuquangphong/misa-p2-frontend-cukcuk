@@ -10,7 +10,11 @@
       <div class="input-filter">
         <div class="input-container">
           <div class="input-inside">
-            <input type="text" />
+            <input
+              :class="{ priceFilter: isFilterPrice }"
+              type="text"
+              v-model="valueInput"
+            />
           </div>
         </div>
       </div>
@@ -19,8 +23,125 @@
 </template>
 
 <script>
+import { filterFromMoney, filterToMoney } from "@/utils/commonFunc";
+import { mapActions, mapGetters } from "vuex";
 export default {
-  props: ["isFilterPrice"],
+  props: ["isFilterPrice", "field"],
+
+  data() {
+    return {
+      valueInput: "",
+      timeout: null,
+    };
+  },
+
+  computed: {
+    ...mapGetters([
+      "codeFilter",
+      "nameFilter",
+      "groupFilter",
+      "unitFilter",
+      "priceFilter",
+    ]),
+  },
+
+  watch: {
+    /**
+     * Watch value of input to filter the Food
+     * Author: VQPhong (22/07/2022)
+     */
+    valueInput: function (value) {
+      const cur = this;
+
+      if (this.isFilterPrice) {
+        cur.valueInput = filterFromMoney(value);
+      }
+
+      let tempValue = cur.valueInput;
+
+      if (this.isFilterPrice) {
+        tempValue = filterToMoney(tempValue);
+
+        if (!tempValue) tempValue = 0;
+      }
+
+      clearTimeout(cur.timeout);
+
+      cur.timeout = setTimeout(() => {
+        cur[`change${cur.field}Filter`](tempValue);
+      }, 1000);
+    },
+
+    /**
+     * Clear value of input after reloading for Add new
+     * Author: VQPhong (22/07/2022)
+     */
+    codeFilter: function (value) {
+      if (this.field === "Code") {
+        if (value === "" || value === null) {
+          this.valueInput = "";
+        }
+      }
+    },
+
+    /**
+     * Clear value of input after reloading for Add new
+     * Author: VQPhong (22/07/2022)
+     */
+    nameFilter: function (value) {
+      if (this.field === "Name") {
+        if (value === "" || value === null) {
+          this.valueInput = "";
+        }
+      }
+    },
+
+    /**
+     * Clear value of input after reloading for Add new
+     * Author: VQPhong (22/07/2022)
+     */
+    groupFilter: function (value) {
+      if (this.field === "Group") {
+        if (value === "" || value === null) {
+          this.valueInput = "";
+        }
+      }
+    },
+
+    /**
+     * Clear value of input after reloading for Add new
+     * Author: VQPhong (22/07/2022)
+     */
+    unitFilter: function (value) {
+      if (this.field === "Unit") {
+        if (value === "" || value === null) {
+          this.valueInput = "";
+        }
+      }
+    },
+
+    /**
+     * Clear value of input after reloading for Add new
+     * Author: VQPhong (22/07/2022)
+     */
+    priceFilter: function (value) {
+      if (this.field === "Price") {
+        if (value === "" || value === null) {
+          this.valueInput = "";
+        }
+      }
+    },
+  },
+
+  methods: {
+    ...mapActions([
+      "changeCodeFilter",
+      "changeNameFilter",
+      "changeGroupFilter",
+      "changeUnitFilter",
+      "changePriceFilter",
+    ]),
+  },
 };
 </script>
 
@@ -62,6 +183,10 @@ export default {
   padding: 3px 5px 3px;
   font-size: 12px;
   outline: none;
+}
+
+.input-inside input.priceFilter {
+  text-align: right;
 }
 
 .input-inside input:focus {

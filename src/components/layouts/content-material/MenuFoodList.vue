@@ -21,7 +21,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader />
+                  <BaseFilterHeader :field="'Code'" />
                 </div>
               </div>
             </th>
@@ -32,7 +32,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader />
+                  <BaseFilterHeader :field="'Name'" />
                 </div>
               </div>
             </th>
@@ -43,7 +43,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader />
+                  <BaseFilterHeader :field="'Group'" />
                 </div>
               </div>
             </th>
@@ -54,7 +54,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader />
+                  <BaseFilterHeader :field="'Unit'" />
                 </div>
               </div>
             </th>
@@ -65,7 +65,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :isFilterPrice="true" />
+                  <BaseFilterHeader :isFilterPrice="true" :field="'Price'" />
                 </div>
               </div>
             </th>
@@ -182,7 +182,7 @@
     <div class="some-dialogs">
       <FoodFormDetail
         @reloadForAdd="reloadForAdd"
-        @reloadForUpdate="getFoodPaging"
+        @reloadForUpdate="reloadForAdd"
       />
     </div>
   </div>
@@ -251,6 +251,46 @@ export default {
      * Author: VQPhong (17/07/2022)
      */
     pageSize: function () {
+      this.getFoodPaging();
+    },
+
+    /**
+     * Call paging API again when codeFilter changed
+     * Author: VQPhong (22/07/2022)
+     */
+    codeFilter: function () {
+      this.getFoodPaging();
+    },
+
+    /**
+     * Call paging API again when nameFilter changed
+     * Author: VQPhong (22/07/2022)
+     */
+    nameFilter: function () {
+      this.getFoodPaging();
+    },
+
+    /**
+     * Call paging API again when groupFilter changed
+     * Author: VQPhong (22/07/2022)
+     */
+    groupFilter: function () {
+      this.getFoodPaging();
+    },
+
+    /**
+     * Call paging API again when unitFilter changed
+     * Author: VQPhong (22/07/2022)
+     */
+    unitFilter: function () {
+      this.getFoodPaging();
+    },
+
+    /**
+     * Call paging API again when priceFilter changed
+     * Author: VQPhong (22/07/2022)
+     */
+    priceFilter: function () {
       this.getFoodPaging();
     },
 
@@ -324,6 +364,12 @@ export default {
      * Author: VQPhong (18/07/2022)
      */
     async reloadForAdd() {
+      this.changeCodeFilter("");
+      this.changeNameFilter("");
+      this.changeGroupFilter("");
+      this.changeUnitFilter("");
+      this.changePriceFilter("");
+
       if (this.pageIndex !== 1) {
         this.changePageIndex(1);
       } else {
@@ -397,7 +443,12 @@ export default {
       "openFormDetail",
       "changeIsBinding",
       "stopReplication",
-      'beingModify'
+      "beingModify",
+      "changeCodeFilter",
+      "changeNameFilter",
+      "changeGroupFilter",
+      "changeUnitFilter",
+      "changePriceFilter",
     ]),
   },
 };

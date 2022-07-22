@@ -629,7 +629,8 @@ export default {
       isOptionPlace: false,
 
       tempAutoCode: "",
-      timeout: null,
+      timeoutFoodName: null,
+      timeoutOpenForm: null,
 
       isClickDropdownGroup: false,
       isClickDropdownUnit: false,
@@ -643,12 +644,19 @@ export default {
      * Author: VQPhong (19/07/2022)
      */
     isOpenFormDetail: function (value) {
+      const cur = this;
+
       if (!value) {
-        this.clearForm();
-        this.isGeneralTab = true;
-      } else {
-        this.$refs.firstInput.focus();
+        cur.clearForm();
+        cur.isGeneralTab = true;
+        cur.stopReplication();
       }
+
+      clearTimeout(cur.timeoutOpenForm);
+
+      cur.timeoutOpenForm = setTimeout(() => {
+        cur.$refs.firstInput.focus();
+      }, 100);
 
       requireFoodFields.forEach((field) => {
         this[`isEmpty${field}`] = false;
@@ -717,9 +725,9 @@ export default {
     "formInfo.FoodName": function (val) {
       const cur = this;
 
-      clearTimeout(cur.timeout);
+      clearTimeout(cur.timeoutFoodName);
 
-      cur.timeout = setTimeout(() => {
+      cur.timeoutFoodName = setTimeout(() => {
         cur.tempAutoCode = genCodeFromName(val);
       }, 100);
     },
@@ -973,7 +981,6 @@ export default {
                 : (cur.formInfo[key] = autoCode);
             }
 
-            cur.stopReplication();
             cur.stopModify();
           } else {
             cur.formInfo[key] = res.data.responseData[key];
