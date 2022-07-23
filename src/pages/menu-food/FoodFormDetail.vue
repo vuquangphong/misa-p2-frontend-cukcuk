@@ -141,7 +141,8 @@
                               type="text"
                               v-model="formInfo.FoodGroup.Name"
                               @focusin="focusinEvent('Group', false)"
-                              @blur="isFocusGroup = false"
+                              @blur="focusoutComboEvent('Group')"
+                              @keypress="eventEnterPress('Group')"
                               ref="inputGroup"
                             />
 
@@ -177,6 +178,26 @@
                               </div>
                             </div>
                           </div>
+
+                          <div
+                            class="expandOption filter"
+                            v-if="!isOptionGroup && tempFoodGroup.length > 0"
+                            v-click-outside="eventBlurFilterGroup"
+                          >
+                            <div class="option-container">
+                              <div
+                                v-for="(option, index) in tempFoodGroup"
+                                :key="index"
+                              >
+                                <div
+                                  class="option"
+                                  @click="chooseOptionCombo(option, 'Group')"
+                                >
+                                  {{ option.FoodGroupName }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -201,7 +222,8 @@
                               type="text"
                               v-model="formInfo.FoodUnit.Name"
                               @focusin="focusinEvent('UnitID', true)"
-                              @blur="isFocusUnitID = false"
+                              @blur="focusoutComboEvent('UnitID')"
+                              @keypress="eventEnterPress('Unit')"
                               ref="inputUnit"
                             />
 
@@ -241,6 +263,26 @@
                             <div class="option-container">
                               <div
                                 v-for="(option, index) in foodUnit"
+                                :key="index"
+                              >
+                                <div
+                                  class="option"
+                                  @click="chooseOptionCombo(option, 'Unit')"
+                                >
+                                  {{ option.FoodUnitName }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div
+                            class="expandOption filter"
+                            v-if="!isOptionUnit && tempFoodUnit.length > 0"
+                            v-click-outside="eventBlurFilterUnit"
+                          >
+                            <div class="option-container">
+                              <div
+                                v-for="(option, index) in tempFoodUnit"
                                 :key="index"
                               >
                                 <div
@@ -362,7 +404,8 @@
                               type="text"
                               v-model="formInfo.FoodPlace.Name"
                               @focusin="focusinEvent('Place', false)"
-                              @blur="focusoutEvent('Place', false)"
+                              @blur="focusoutComboEvent('Place')"
+                              @keypress="eventEnterPress('Place')"
                               ref="inputPlace"
                             />
 
@@ -385,6 +428,26 @@
                             <div class="option-container">
                               <div
                                 v-for="(option, index) in foodPlace"
+                                :key="index"
+                              >
+                                <div
+                                  class="option"
+                                  @click="chooseOptionCombo(option, 'Place')"
+                                >
+                                  {{ option.FoodPlaceName }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div
+                            class="expandOption filter foodPlace"
+                            v-if="!isOptionPlace && tempFoodPlace.length > 0"
+                            v-click-outside="eventBlurFilterPlace"
+                          >
+                            <div class="option-container">
+                              <div
+                                v-for="(option, index) in tempFoodPlace"
                                 :key="index"
                               >
                                 <div
@@ -532,7 +595,7 @@
       @closeExtraForm="isUnitFormOpen = false"
     />
 
-    <AddPlaceForm 
+    <AddPlaceForm
       :isOpenExtraForm="isPlaceFormOpen"
       @closeExtraForm="isPlaceFormOpen = false"
     />
@@ -556,10 +619,10 @@ import {
 } from "@/utils/commonFunc";
 import AddGroupForm from "./AddGroupForm.vue";
 import AddUnitForm from "./AddUnitForm.vue";
-import AddPlaceForm from './AddPlaceForm.vue';
+import AddPlaceForm from "./AddPlaceForm.vue";
 
 export default {
-  components: { DuplicatedMessage, AddGroupForm, AddUnitForm, AddPlaceForm, },
+  components: { DuplicatedMessage, AddGroupForm, AddUnitForm, AddPlaceForm },
 
   setup() {
     const state = reactive({
@@ -659,15 +722,27 @@ export default {
       isClickDropdownUnit: false,
       isClickDropdownPlace: false,
 
+      isChoseGroup: false,
+      isChoseUnit: false,
+      isChosePlace: false,
+
       isGroupFormOpen: false,
       isUnitFormOpen: false,
       isPlaceFormOpen: false,
+
+      tempFoodGroup: [],
+      tempFoodUnit: [],
+      tempFoodPlace: [],
+
+      isBindingLocalGroup: false,
+      isBindingLocalUnit: false,
+      isBindingLocalPlace: false,
     };
   },
 
   watch: {
     /**
-     * Alter some states when Form Detail closed
+     * Alter some states when Form Detail close/open
      * Author: VQPhong (19/07/2022)
      */
     isOpenFormDetail: function (value) {
@@ -759,6 +834,79 @@ export default {
         cur.tempAutoCode = genCodeFromName(val);
       }, 100);
     },
+
+    /**
+     * Filter FoodGroup combobox
+     * Author: VQPhong (22/07/2022)
+     */
+    "formInfo.FoodGroup.Name": function (val) {
+      if (!val) {
+        this.tempFoodGroup = [];
+      } else {
+        if (this.isBindingLocalGroup) {
+          this.isBindingLocalGroup = false;
+        } else {
+          if (this.isChoseGroup) {
+            this.isChoseGroup = false;
+          } else {
+            let tempVal = val.toLowerCase();
+            let tempFilter = this.foodGroup.filter((group) =>
+              group.FoodGroupName.toLowerCase().includes(tempVal)
+            );
+            this.tempFoodGroup = tempFilter;
+          }
+        }
+      }
+    },
+
+    /**
+     * Filter FoodGroup combobox
+     * Author: VQPhong (22/07/2022)
+     */
+    "formInfo.FoodUnit.Name": function (val) {
+      if (!val) {
+        this.tempFoodUnit = [];
+      } else {
+        if (this.isBindingLocalUnit) {
+          this.isBindingLocalUnit = false;
+        } else {
+          if (this.isChoseUnit) {
+            this.isChoseUnit = false;
+          } else {
+            let tempVal = val.toLowerCase();
+            let tempFilter = this.foodUnit.filter((unit) =>
+              unit.FoodUnitName.toLowerCase().includes(tempVal)
+            );
+            this.tempFoodUnit = tempFilter;
+          }
+        }
+      }
+    },
+
+    /**
+     * Filter FoodGroup combobox
+     * Author: VQPhong (22/07/2022)
+     */
+    "formInfo.FoodPlace.Name": function (val) {
+      if (!val) {
+        this.tempFoodPlace = [];
+      } else {
+        if (this.isBindingLocalPlace) {
+          this.isBindingLocalPlace = false;
+        } else {
+          if (this.isChosePlace) {
+            this.isChosePlace = false;
+          } else {
+            let tempVal = val.toLowerCase();
+            let tempFilter = this.foodPlace.filter((place) =>
+              place.FoodPlaceName.toLowerCase().includes(tempVal)
+            );
+            this.tempFoodPlace = tempFilter;
+            console.log(this.tempFoodPlace);
+          }
+        }
+      }
+    },
   },
 
   methods: {
@@ -799,6 +947,44 @@ export default {
     },
 
     /**
+     * Event blur combobox
+     * Author: VQPhong (22/07/2022)
+     */
+    focusoutComboEvent(field) {
+      this[`isFocus${field}`] = false;
+
+      let temp = this[`food${field}`].filter(
+        (item) =>
+          item[`Food${field}Name`] === this.formInfo[`Food${field}`].Name
+      );
+
+      if (temp.length === 0 || !this.formInfo[`Food${field}`].ID) {
+        this.formInfo[`Food${field}`].Name = "";
+        this.formInfo[`Food${field}`].ID = "";
+      }
+
+      this[`tempFood${field}`] = [];
+    },
+
+    /**
+     * Event when press Enter key in combobox
+     * Author: VQPhong (22/07/2022)
+     */
+    eventEnterPress(field) {
+      if (event.keyCode === 13) {
+        if (this[`tempFood${field}`].length > 0) {
+          this.formInfo[`Food${field}`].Name =
+            this[`tempFood${field}`][0][`Food${field}Name`];
+          this.formInfo[`Food${field}`].ID =
+            this[`tempFood${field}`][0][`Food${field}ID`];
+
+          this[`isChose${field}`] = true;
+          this[`tempFood${field}`] = [];
+        }
+      }
+    },
+
+    /**
      * Event click drop down btn in combobox
      * Author: VQPhong (19/07/2022)
      */
@@ -809,17 +995,14 @@ export default {
     },
 
     /**
-     * Event add new option in combobox
-     * Author: VQPhong (19/07/2022)
-     */
-    // TODO: eventAddTrigger(field) {...}
-
-    /**
      * Event choose 1 option of combobox
      * Author: VQPhong (19/07/2022)
      */
     chooseOptionCombo(option, field) {
+      console.log("choosing...");
+      this[`isChose${field}`] = true;
       this[`isOption${field}`] = false;
+      this[`tempFood${field}`] = [];
       this.formInfo[`Food${field}`].Name = option[`Food${field}Name`];
       this.formInfo[`Food${field}`].ID = option[`Food${field}ID`];
     },
@@ -1013,6 +1196,10 @@ export default {
             cur.formInfo[key] = res.data.responseData[key];
           }
         });
+
+        this.isBindingLocalGroup = true;
+        this.isBindingLocalUnit = true;
+        this.isBindingLocalPlace = true;
       } catch (err) {
         console.log(err);
       }
@@ -1079,6 +1266,25 @@ export default {
     },
 
     /**
+     * Event blur to hide filter group options
+     * Author: VQPhong (22/07/2022)
+     */
+    eventBlurFilterGroup() {
+      if (!this.isFocusGroup) {
+        let temp = this.tempFoodGroup.filter(
+          (group) => group.FoodGroupName === this.formInfo.FoodGroup.Name
+        );
+
+        if (temp.length === 0 || !this.formInfo.FoodGroup.ID) {
+          this.formInfo.FoodGroup.Name = "";
+          this.formInfo.FoodGroup.ID = "";
+        }
+
+        this.tempFoodGroup = [];
+      }
+    },
+
+    /**
      * Event blur to hide group options
      * Author: VQPhong (21/07/2022)
      */
@@ -1091,6 +1297,25 @@ export default {
     },
 
     /**
+     * Event blur to hide filter unit options
+     * Author: VQPhong (22/07/2022)
+     */
+    eventBlurFilterUnit() {
+      if (!this.isFocusUnitID) {
+        let temp = this.tempFoodUnit.filter(
+          (unit) => unit.FoodUnitName === this.formInfo.FoodUnit.Name
+        );
+
+        if (temp.length === 0 || !this.formInfo.FoodUnit.ID) {
+          this.formInfo.FoodUnit.Name = "";
+          this.formInfo.FoodUnit.ID = "";
+        }
+
+        this.tempFoodUnit = [];
+      }
+    },
+
+    /**
      * Event blur to hide group options
      * Author: VQPhong (21/07/2022)
      */
@@ -1099,6 +1324,25 @@ export default {
         this.isClickDropdownPlace = false;
       } else {
         this.isOptionPlace = false;
+      }
+    },
+
+    /**
+     * Event blur to hide filter place options
+     * Author: VQPhong (22/07/2022)
+     */
+    eventBlurFilterPlace() {
+      if (!this.isFocusPlace) {
+        let temp = this.tempFoodPlace.filter(
+          (place) => place.FoodPlaceName === this.formInfo.FoodPlace.Name
+        );
+
+        if (temp.length === 0 || !this.formInfo.FoodPlace.ID) {
+          this.formInfo.FoodPlace.Name = "";
+          this.formInfo.FoodPlace.ID = "";
+        }
+
+        this.tempFoodPlace = [];
       }
     },
 
@@ -1649,6 +1893,18 @@ fieldset {
 }
 
 .expandOption.foodPlace {
+  height: auto;
+  max-height: 150px;
+  overflow: auto;
+}
+
+.expandOption.filter {
+  height: auto;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.expandOption.filter.foodPlace {
   height: auto;
   max-height: 150px;
   overflow: auto;
