@@ -7,7 +7,7 @@
             {{ isModify ? formTitleUpdate : formTitleAdd }}
           </div>
           <div class="form-close-btn">
-            <div class="close-icon" @click="closeFormDetail"></div>
+            <div class="close-icon" @click="eventCloseXButton"></div>
           </div>
         </div>
       </div>
@@ -222,7 +222,7 @@
                               type="text"
                               v-model="formInfo.FoodUnit.Name"
                               @focusin="focusinEvent('UnitID', true)"
-                              @blur="focusoutComboEvent('UnitID')"
+                              @blur="focusoutComboEvent('Unit')"
                               @keypress="eventEnterPress('Unit')"
                               ref="inputUnit"
                             />
@@ -585,6 +585,16 @@
       @closeMessage="isAlertDuplicatedCode = false"
     />
 
+    <AlertChangedData
+      :isOpen="isChangedDataOpen"
+      @yesChangedData="
+        eventStoreBtn();
+        isChangedDataOpen = false;
+      "
+      @noChangedData="noChangedDataFunc"
+      @cancelChangedData="isChangedDataOpen = false"
+    />
+
     <AddGroupForm
       :isOpenExtraForm="isGroupFormOpen"
       @closeExtraForm="isGroupFormOpen = false"
@@ -620,9 +630,16 @@ import {
 import AddGroupForm from "./AddGroupForm.vue";
 import AddUnitForm from "./AddUnitForm.vue";
 import AddPlaceForm from "./AddPlaceForm.vue";
+import AlertChangedData from "./AlertChangedData.vue";
 
 export default {
-  components: { DuplicatedMessage, AddGroupForm, AddUnitForm, AddPlaceForm },
+  components: {
+    DuplicatedMessage,
+    AddGroupForm,
+    AddUnitForm,
+    AddPlaceForm,
+    AlertChangedData,
+  },
 
   setup() {
     const state = reactive({
@@ -737,6 +754,10 @@ export default {
       isBindingLocalGroup: false,
       isBindingLocalUnit: false,
       isBindingLocalPlace: false,
+
+      isChangedDataOpen: false,
+      isChangedData: false,
+      isClearOrBinding: false,
     };
   },
 
@@ -817,6 +838,10 @@ export default {
       this.formInfo.FoodPrice = filterFromMoney(val);
     },
 
+    /**
+     * Filter Money in Form Detail
+     * Author: VQPhong (20/07/2022)
+     */
     "formInfo.FoodInvest": function (val) {
       this.formInfo.FoodInvest = filterFromMoney(val);
     },
@@ -907,6 +932,22 @@ export default {
         }
       }
     },
+
+    /**
+     * Watch whether data is being changed
+     * Author: VQPhong (23/07/2022)
+     */
+    formInfo: {
+      handler: function() {
+        if (this.isClearOrBinding) {
+          this.isChangedData = false;
+          this.isClearOrBinding = false;
+        } else {
+          this.isChangedData = true;
+        }
+      },
+      deep: true,
+    },
   },
 
   methods: {
@@ -951,7 +992,11 @@ export default {
      * Author: VQPhong (22/07/2022)
      */
     focusoutComboEvent(field) {
-      this[`isFocus${field}`] = false;
+      if (field === "Unit") {
+        this.isFocusUnitID = false;
+      } else {
+        this[`isFocus${field}`] = false;
+      }
 
       let temp = this[`food${field}`].filter(
         (item) =>
@@ -1146,6 +1191,8 @@ export default {
           this.formInfo[key] = "";
         }
       });
+
+      this.isClearOrBinding = true;
     },
 
     /**
@@ -1200,6 +1247,8 @@ export default {
         this.isBindingLocalGroup = true;
         this.isBindingLocalUnit = true;
         this.isBindingLocalPlace = true;
+
+        this.isClearOrBinding = true;
       } catch (err) {
         console.log(err);
       }
@@ -1352,6 +1401,27 @@ export default {
      */
     eventAddTrigger(field) {
       this[`is${field}FormOpen`] = true;
+    },
+
+    /**
+     * Close the Dialog alerts that data of employee has changed.
+     * Author: VQPhong (23/07/2022)
+     */
+    noChangedDataFunc() {
+      this.closeFormDetail();
+      this.isChangedDataOpen = false;
+    },
+
+    /**
+     * Event close form detail with button X
+     * Author: VQPhong (23/07/2022)
+     */
+    eventCloseXButton() {
+      if (this.isChangedData) {
+        this.isChangedDataOpen = true;
+      } else {
+        this.closeFormDetail();
+      }
     },
 
     ...mapActions([
