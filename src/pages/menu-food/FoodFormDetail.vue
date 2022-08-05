@@ -535,7 +535,67 @@
               </div>
 
               <div class="main-body-favor-service" v-show="!isGeneralTab">
-                Tính năng đang phát triển!
+                <div class="title-food">
+                  <span class="label">Món ăn:&nbsp;</span>
+                  <span class="food-name">{{ formInfo.FoodName }}</span>
+                </div>
+
+                <div class="addition-note">
+                  Ghi lại các sở thích của khách hàng giúp nhân viên phục vụ
+                  chọn nhanh order.
+                  <br />
+                  VD: không cay/ít hành/thêm phomai...
+                </div>
+
+                <div class="grid-panel-container">
+                  <div class="grid-panel">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th class="left">Sở thích phục vụ</th>
+                          <th
+                            :class="{
+                              rightFlow: currentFavorService.length >= 8,
+                            }"
+                          >
+                            Thu thêm
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        <tr
+                          v-for="(data, index) in currentFavorService"
+                          :key="index"
+                          :class="{ even: index % 2 === 1 }"
+                        >
+                          <BaseFavorServiceRow :index="index" />
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div class="panel-button">
+                  <button class="button" @click="addRowEvent">
+                    <div class="add-row-btn">
+                      <span class="icon"></span>
+                      <span class="title">{{ btnAddRow }}</span>
+                    </div>
+                  </button>
+                  <button
+                    :class="{
+                      button: true,
+                      cannotDel: currentFavorService <= 0,
+                    }"
+                    @click="delRowEvent"
+                  >
+                    <div class="del-row-btn">
+                      <span class="icon"></span>
+                      <span class="title">{{ btnDelRow }}</span>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -618,19 +678,21 @@ import { resourceCukcuk } from "@/utils/resourceCukcuk";
 import { mapActions, mapGetters } from "vuex";
 import { enumCukcuk } from "@/utils/enumCukcuk";
 import { reactive, toRefs } from "vue";
-import { createModel } from "@/utils/call_apis/Post";
-import { updateModelById } from "@/utils/call_apis/Put";
+import { createFullModel } from "@/utils/call_apis/Post";
+import { updateFullModelById, updateModelById } from "@/utils/call_apis/Put";
 import { requireFoodFields } from "@/utils/constants";
 import { getAll, getById } from "@/utils/call_apis/Get";
 import {
   genCodeFromName,
   filterFromMoney,
   filterToMoney,
+  concatObject,
 } from "@/utils/commonFunc";
 import AddGroupForm from "./AddGroupForm.vue";
 import AddUnitForm from "./AddUnitForm.vue";
 import AddPlaceForm from "./AddPlaceForm.vue";
 import AlertChangedData from "./AlertChangedData.vue";
+import BaseFavorServiceRow from "../../components/base/BaseFavorServiceRow.vue";
 
 export default {
   components: {
@@ -639,6 +701,7 @@ export default {
     AddUnitForm,
     AddPlaceForm,
     AlertChangedData,
+    BaseFavorServiceRow,
   },
 
   setup() {
@@ -679,6 +742,8 @@ export default {
       "isReplication",
       "isBinding",
       "isModify",
+      "currentFavorService",
+      "isCurrentFavorChanging",
     ]),
   },
 
@@ -695,6 +760,8 @@ export default {
       btnStore: resourceCukcuk.VI.buttons.btnStore,
       btnStoreAndAdd: resourceCukcuk.VI.buttons.btnStoreAndAdd,
       btnCancel: resourceCukcuk.VI.buttons.btnCancel,
+      btnAddRow: resourceCukcuk.VI.buttons.btnAddRow,
+      btnDelRow: resourceCukcuk.VI.buttons.btnDelRow,
       avatar: resourceCukcuk.VI.tableHeader.avatar,
       msgNoFunction: resourceCukcuk.VI.message.noFunction,
       guideAvatar1: resourceCukcuk.VI.tableHeader.guideChooseAvatar1,
@@ -813,6 +880,11 @@ export default {
      */
     isModify: function (value) {
       if (value) {
+        // Flag that current favor has not been changed in init state of Modification
+        // ... hmmm actually this part has something wrong
+        this.isCurrentFavorChanging = false;
+
+        // Change mode action => PUT
         this.modeAction = enumCukcuk.modeAction.put;
       }
     },
@@ -938,7 +1010,7 @@ export default {
      * Author: VQPhong (23/07/2022)
      */
     formInfo: {
-      handler: function() {
+      handler: function () {
         if (this.isClearOrBinding) {
           this.isChangedData = false;
           this.isClearOrBinding = false;
@@ -951,6 +1023,22 @@ export default {
   },
 
   methods: {
+    /**
+     * Event for adding a new row in FavorService
+     * Author: VQPhong (25/07/2022)
+     */
+    addRowEvent() {
+      this.$store.state.currentFavorService.push({ Content: "", Surcharge: 0 });
+    },
+
+    /**
+     * Event for removing a row in FavorService
+     * Author: VQPhong (25/07/2022)
+     */
+    delRowEvent() {
+      this.$store.state.currentFavorService.pop();
+    },
+
     /**
      * Alert no function
      * Author: VQPhong (14/07/2022)
@@ -1072,6 +1160,8 @@ export default {
       if (!this.alertInterrupt) {
         this.modeAction = enumCukcuk.modeAction.post;
         this.clearForm();
+        this.isGeneralTab = true;
+        this.emptyCurrentFavorService();
         this.stopModify();
         this.$refs.firstInput.focus();
       }
@@ -1130,7 +1220,20 @@ export default {
         cur.controlLoader();
 
         if (cur.modeAction === enumCukcuk.modeAction.post) {
-          const res = await createModel("v1", "Foods", formPost);
+          let textFavorService;
+
+          if (cur.currentFavorService.length > 0) {
+            textFavorService = concatObject(cur.currentFavorService);
+          } else {
+            textFavorService = "";
+          }
+
+          const res = await createFullModel(
+            "v1",
+            "Foods",
+            formPost,
+            textFavorService
+          );
 
           if (
             res.data.customStatusCode === enumCukcuk.customizeStatusCode.created
@@ -1142,12 +1245,35 @@ export default {
             cur.alertInterrupt = false;
           }
         } else {
-          const res = await updateModelById(
-            "v1",
-            "Foods",
-            cur.currentFood.FoodID,
-            formPost
-          );
+          let res;
+
+          // Actually this place of processing has not been correct
+          if (cur.isCurrentFavorChanging) {
+            console.log('???');
+            let textFavorService;
+
+            if (cur.currentFavorService.length > 0) {
+              textFavorService = concatObject(cur.currentFavorService);
+            } else {
+              textFavorService = "";
+            }
+
+            res = await updateFullModelById(
+              "v1",
+              "Foods",
+              formPost,
+              cur.currentFood.FoodID,
+              textFavorService
+            );
+          } else {
+            console.log('không hề update favor');
+            res = await updateModelById(
+              "v1",
+              "Foods",
+              cur.currentFood.FoodID,
+              formPost
+            );
+          }
 
           if (
             res.data.customStatusCode === enumCukcuk.customizeStatusCode.updated
@@ -1431,6 +1557,7 @@ export default {
       "stopReplication",
       "changeCurrentFood",
       "stopModify",
+      "emptyCurrentFavorService",
     ]),
   },
 };
@@ -1634,28 +1761,28 @@ input.number {
   display: flex;
 }
 
-/* .left-buttons {
-  
-} */
-
 .right-buttons {
   flex: 1;
   display: flex;
   justify-content: right;
 }
 
-.form-buttons .button {
+.form-buttons .button,
+.panel-button .button {
   cursor: pointer;
   border: 1px solid #ccc;
   padding: 3px;
+  background-color: #fcfcfc;
 }
 
-.form-buttons .button:hover {
+.form-buttons .button:hover,
+.panel-button .button:hover {
   border-color: #0071c1;
   background-image: -webkit-linear-gradient(top, #eff0ee, #eff2e9);
 }
 
-.form-buttons .button:focus-visible {
+.form-buttons .button:focus-visible,
+.panel-button .button:focus-visible {
   background-image: -webkit-linear-gradient(top, #eff0ee, #eff2e9);
   outline: none;
   border-color: #0071c1;
@@ -1698,9 +1825,12 @@ input.number {
   display: inline-block;
 }
 
-.form-buttons .title {
+.form-buttons .title,
+.panel-button .title {
   font-size: 12px;
   padding: 0.5px 5px 0 5px;
+  display: flex;
+  align-items: center;
 }
 
 .help-btn .icon {
@@ -1857,10 +1987,127 @@ fieldset {
 }
 
 .main-body-favor-service {
-  padding-top: 200px;
+  height: 318px;
+}
+
+.main-body-favor-service .title-food {
+  font-size: 13px;
+  padding-top: 5.8px;
+  padding-bottom: 6px;
+}
+
+.main-body-favor-service .addition-note {
+  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/icon-info32-2.png")
+    no-repeat 0px center;
+  padding-left: 42px;
+  font-size: 13px;
+  font-style: italic;
+  height: 34px;
+  line-height: 17px;
+}
+
+.main-body-favor-service .grid-panel-container {
+  border: 1px solid #c1c1c1;
+  height: 214px;
+  margin-top: 8px;
+  overflow: auto;
+}
+
+.main-body-favor-service .grid-panel {
+  height: calc(100% - 2px);
+  overflow: unset;
+}
+
+table thead {
+  height: 29px;
+  background-color: #ededed;
+}
+
+thead,
+thead th {
+  z-index: 1;
+  position: sticky;
+  top: 0;
+}
+
+table thead th.left {
+  border-right: 1px solid #c1c1c1;
+  width: 482px;
+}
+
+table thead th.rightFlow {
+  border-right: 1px solid #c1c1c1;
+}
+
+table thead th + th {
+  width: 240px;
+}
+
+table thead th {
+  border-bottom: 1px solid #c1c1c1;
+  font-size: 13px;
+  font-weight: normal;
+  color: #000;
   text-align: center;
-  font-weight: 600;
-  font-size: x-large;
+}
+
+table thead th:hover {
+  background-color: #eef6fb;
+}
+
+.grid-header .inside {
+  padding: 7px 10px;
+}
+
+.grid-panel .grid-body {
+  overflow: auto;
+}
+
+table {
+  border-spacing: 0;
+}
+
+table tr {
+  height: 24px;
+  border-bottom: 1px solid #c1c1c1;
+}
+
+.panel-button {
+  padding-top: 5px;
+}
+
+.panel-button .button {
+  margin-right: 5px;
+}
+
+.panel-button .button.cannotDel {
+  opacity: 0.5;
+}
+
+.panel-button .button .add-row-btn,
+.panel-button .button .del-row-btn {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  height: 17px;
+  width: 92px;
+}
+
+.panel-button .button .icon {
+  background-image: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/IconSprite.png");
+  background-color: transparent;
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+.panel-button .add-row-btn .icon {
+  background-position: 0 -2648px;
+}
+
+.panel-button .del-row-btn .icon {
+  background-position: 0 -2680px;
 }
 
 .input-container {

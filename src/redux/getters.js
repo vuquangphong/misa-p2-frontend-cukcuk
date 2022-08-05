@@ -9,6 +9,8 @@ export default {
     isModify: state => state.isModify,
 
     currentFood: state => state.currentFood,
+    currentFavorService: state => state.currentFavorService,
+    isCurrentFavorChanging: state => state.isCurrentFavorChanging,
     currentTotalNumberFood: state => state.currentTotalNumberFood,
     
     foodGroup: state => state.foodGroup,

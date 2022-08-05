@@ -1,4 +1,5 @@
-import { getAll } from "@/utils/call_apis/Get";
+import { getAll, getChildrenById } from "@/utils/call_apis/Get";
+import { filterFromMoney } from "@/utils/commonFunc";
 
 export default {
     openFormDetail({ commit }) {
@@ -47,6 +48,35 @@ export default {
 
     changeCurrentFood({ commit }, payload) {
         commit('setCurrentFood', payload);
+    },
+
+    async changeCurrentFavorService({ commit }, payload) {
+        try {
+            const res = await getChildrenById('v1', "FavorServices", "Foods", payload);
+
+            let tempCurService;
+
+            if (res.data.responseData.length) {
+                tempCurService = res.data.responseData.map((e) => {
+                    return { Content: e.Content, Surcharge: filterFromMoney(e.Surcharge) };
+                });
+            } else {
+                tempCurService = [];
+            }
+
+            commit('setCurrentFavorService', tempCurService);
+        } catch (err) {
+            commit('setCurrentFavorService', []);
+            console.log(err);
+        }
+    },
+
+    emptyCurrentFavorService({ commit }) {
+        commit('setCurrentFavorService', []);
+    },
+
+    changeIsCurrentFavorChanging({ commit }, payload) {
+        commit('setIsCurrentFavorChanging', payload);
     },
 
     changeCurrentTotalNumberFood({ commit }, payload) {

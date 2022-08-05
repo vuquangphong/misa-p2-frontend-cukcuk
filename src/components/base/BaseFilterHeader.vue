@@ -9,13 +9,13 @@
 
       <div class="input-filter">
         <div class="input-container">
-          <div class="input-inside">
+          <form @submit="search" class="input-inside">
             <input
               :class="{ priceFilter: isFilterPrice }"
               type="text"
               v-model="valueInput"
             />
-          </div>
+          </form>
         </div>
       </div>
     </div>
@@ -65,11 +65,14 @@ export default {
         if (!tempValue) tempValue = 0;
       }
 
-      clearTimeout(cur.timeout);
+      // clearTimeout(cur.timeout);
 
-      cur.timeout = setTimeout(() => {
-        cur[`change${cur.field}Filter`](tempValue);
-      }, 1000);
+      // cur.timeout = setTimeout(() => {
+      //   cur[`change${cur.field}Filter`](tempValue);
+      // }, 1000);
+
+      // Change the value of filter in vuex
+      cur[`change${cur.field}Filter`](tempValue);
     },
 
     /**
@@ -134,6 +137,15 @@ export default {
   },
 
   methods: {
+    /**
+     * Author: VQPhong (05/08/2022)
+     * Submit form and call API paging
+     */
+    search(event) {
+      event.preventDefault();
+      this.$emit('search', null);
+    },
+
     ...mapActions([
       "changeCodeFilter",
       "changeNameFilter",

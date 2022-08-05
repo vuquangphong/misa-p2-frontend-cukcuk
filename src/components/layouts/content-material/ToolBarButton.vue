@@ -67,7 +67,11 @@ export default {
      * Author: VQPhong (17/07/2022)
      */
     eventOpenForAdd() {
+      // Remove current Food
       this.changeCurrentFood(false);
+
+      // Remove current favorite service
+      this.emptyCurrentFavorService();
       this.openFormDetail();
     },
 
@@ -77,7 +81,11 @@ export default {
      */
     eventOpenForReplica() {
       this.resetCurrentFood();
+
+      // flag replication
       this.beingReplication();
+
+      // flag being binding
       this.changeIsBinding();
       this.openFormDetail();
     },
@@ -88,7 +96,11 @@ export default {
      */
     eventOpenForModify() {
       this.resetCurrentFood();
+
+      // flag modification
       this.beingModify();
+
+      // flag "being binding"
       this.changeIsBinding();
       this.openFormDetail();
     },
@@ -111,18 +123,22 @@ export default {
     },
 
     /**
-     * Reset currentFood if false
+     * Reset currentFood if no current food
      * Author: VQPhong (17/07/2022)
      */
     resetCurrentFood() {
       if (!this.currentFood) {
         for (const food of this.dataFoodPaging) {
           if (food.Selected) {
+            // reset current food
             this.changeCurrentFood({
               FoodID: food.FoodID,
               FoodCode: food.FoodCode,
               FoodName: food.FoodName,
             });
+
+            // reset current favorite service
+            this.changeCurrentFavorService(food.FoodID);
 
             break;
           }
@@ -138,6 +154,8 @@ export default {
       "changeIsBinding",
       "changeReloadFlag",
       "beingModify",
+      "changeCurrentFavorService",
+      "emptyCurrentFavorService",
     ]),
   },
 };

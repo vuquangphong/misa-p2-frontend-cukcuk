@@ -35,6 +35,14 @@ export default {
         state.currentFood = currentFood;
     },
 
+    setCurrentFavorService(state, currentFavorService) {
+        state.currentFavorService = currentFavorService;
+    },
+
+    setIsCurrentFavorChanging(state, isCurrentFavorChanging) {
+        state.isCurrentFavorChanging = isCurrentFavorChanging;
+    },
+
     setCurrentTotalNumberFood(state, currentTotalNumberFood) {
         state.currentTotalNumberFood = currentTotalNumberFood;
     },

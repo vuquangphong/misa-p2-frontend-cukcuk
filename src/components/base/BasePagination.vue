@@ -82,7 +82,11 @@
             </div>
           </div>
 
-          <div class="options-container" v-if="isOpen" v-click-outside="eventBlur">
+          <div
+            class="options-container"
+            v-if="isOpen"
+            v-click-outside="eventBlur"
+          >
             <div class="options-inside">
               <div
                 v-for="(option, index) in pageSizeOptions"
@@ -99,18 +103,21 @@
     </div>
 
     <div class="right-pagin">
-      <div class="content">
+      <div class="content" v-if="currentTotalNumberFood > 0">
         Hiển thị 1 -
         <span>{{ totalRecordsInPage }}</span>
         trên
         <span>{{ currentTotalNumberFood }}</span>
         kết quả
       </div>
+
+      <div class="content" v-else>{{ noData }}</div>
     </div>
   </div>
 </template>
 
 <script>
+import { resourceCukcuk } from "@/utils/resourceCukcuk";
 import { mapActions, mapGetters } from "vuex";
 
 export default {
@@ -133,6 +140,8 @@ export default {
         { selected: false, value: 50 },
         { selected: true, value: 100 },
       ],
+
+      noData: resourceCukcuk.VI.message.noData,
     };
   },
 
@@ -205,7 +214,7 @@ export default {
     },
 
     /**
-     * 
+     *
      */
     eventOpenOptions() {
       this.isOpen = !this.isOpen;

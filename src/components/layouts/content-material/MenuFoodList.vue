@@ -21,7 +21,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :field="'Code'" />
+                  <BaseFilterHeader :field="'Code'" @search="getFoodPaging" />
                 </div>
               </div>
             </th>
@@ -32,7 +32,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :field="'Name'" />
+                  <BaseFilterHeader :field="'Name'" @search="getFoodPaging" />
                 </div>
               </div>
             </th>
@@ -43,7 +43,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :field="'Group'" />
+                  <BaseFilterHeader :field="'Group'" @search="getFoodPaging" />
                 </div>
               </div>
             </th>
@@ -54,7 +54,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :field="'Unit'" />
+                  <BaseFilterHeader :field="'Unit'" @search="getFoodPaging" />
                 </div>
               </div>
             </th>
@@ -65,7 +65,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :isFilterPrice="true" :field="'Price'" />
+                  <BaseFilterHeader :isFilterPrice="true" :field="'Price'" @search="getFoodPaging" />
                 </div>
               </div>
             </th>
@@ -254,45 +254,45 @@ export default {
       this.getFoodPaging();
     },
 
-    /**
-     * Call paging API again when codeFilter changed
-     * Author: VQPhong (22/07/2022)
-     */
-    codeFilter: function () {
-      this.getFoodPaging();
-    },
+    // /**
+    //  * Call paging API again when codeFilter changed
+    //  * Author: VQPhong (22/07/2022)
+    //  */
+    // codeFilter: function () {
+    //   this.getFoodPaging();
+    // },
 
-    /**
-     * Call paging API again when nameFilter changed
-     * Author: VQPhong (22/07/2022)
-     */
-    nameFilter: function () {
-      this.getFoodPaging();
-    },
+    // /**
+    //  * Call paging API again when nameFilter changed
+    //  * Author: VQPhong (22/07/2022)
+    //  */
+    // nameFilter: function () {
+    //   this.getFoodPaging();
+    // },
 
-    /**
-     * Call paging API again when groupFilter changed
-     * Author: VQPhong (22/07/2022)
-     */
-    groupFilter: function () {
-      this.getFoodPaging();
-    },
+    // /**
+    //  * Call paging API again when groupFilter changed
+    //  * Author: VQPhong (22/07/2022)
+    //  */
+    // groupFilter: function () {
+    //   this.getFoodPaging();
+    // },
 
-    /**
-     * Call paging API again when unitFilter changed
-     * Author: VQPhong (22/07/2022)
-     */
-    unitFilter: function () {
-      this.getFoodPaging();
-    },
+    // /**
+    //  * Call paging API again when unitFilter changed
+    //  * Author: VQPhong (22/07/2022)
+    //  */
+    // unitFilter: function () {
+    //   this.getFoodPaging();
+    // },
 
-    /**
-     * Call paging API again when priceFilter changed
-     * Author: VQPhong (22/07/2022)
-     */
-    priceFilter: function () {
-      this.getFoodPaging();
-    },
+    // /**
+    //  * Call paging API again when priceFilter changed
+    //  * Author: VQPhong (22/07/2022)
+    //  */
+    // priceFilter: function () {
+    //   this.getFoodPaging();
+    // },
 
     /**
      * Call paging API again when active Reload button
@@ -314,6 +314,8 @@ export default {
       try {
         cur.controlLoader();
 
+        // let firstFoodId;
+
         const res = await getPaging(
           "v1",
           "Foods",
@@ -331,6 +333,8 @@ export default {
         ) {
           res.data.responseData.Data.forEach((food, index) => {
             if (index === 0) {
+              // firstFoodId = food["FoodID"];
+
               food["Selected"] = true;
               cur.changeCurrentFood({
                 FoodID: food["FoodID"],
@@ -349,6 +353,8 @@ export default {
             res.data.responseData.TotalRecordsInPage
           );
         }
+
+        // cur.changeCurrentFavorService(firstFoodId);
 
         cur.controlLoader();
       } catch (err) {
@@ -384,6 +390,7 @@ export default {
     chooseFood({ FoodID, FoodCode, FoodName, Selected }) {
       this.changeCurrentFood("");
       this.changeCurrentFood({ FoodID, FoodCode, FoodName });
+      this.changeCurrentFavorService(FoodID);
 
       if (!Selected) {
         let checkBreak = 0;
@@ -449,6 +456,7 @@ export default {
       "changeGroupFilter",
       "changeUnitFilter",
       "changePriceFilter",
+      "changeCurrentFavorService",
     ]),
   },
 };
@@ -462,10 +470,6 @@ export default {
   width: 100%;
   height: calc(100% - 53px);
   border-bottom: 1px solid #ccc;
-}
-
-.menu-food-list-container * {
-  overflow: auto;
 }
 
 .menu-food-list-container .grid-view {
@@ -488,7 +492,6 @@ table tr td {
   border: 1px solid #c5c5c5;
   border-left: none;
   border-top: none;
-  border-collapse: collapse;
 }
 
 table tr th {

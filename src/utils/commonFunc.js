@@ -80,3 +80,15 @@ export const clickOutside = {
         document.removeEventListener("click", el.clickOutsideEvent);
     },
 };
+
+/**
+ * Concat a object into a string
+ * Author: VQPhong (25/07/2022)
+ */
+export const concatObject = (arr) => {
+    return arr.map(e => 
+        Object.keys(e).map(key => 
+            key === 'Surcharge' ? filterToMoney(e[key]) : e[key]
+        ).join(',')
+    ).join(';');
+}

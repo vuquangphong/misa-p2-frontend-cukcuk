@@ -10,6 +10,9 @@ export default {
 
     currentFood: '',
     currentTotalNumberFood: 0,
+    
+    currentFavorService: [],
+    isCurrentFavorChanging: false,
 
     foodGroup: [],
     foodUnit: [],

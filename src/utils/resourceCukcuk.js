@@ -9,6 +9,7 @@ export const resourceCukcuk = {
 
             alertRequired: 'Trường này không được để trống.',
             loading: 'Đang lấy dữ liệu...',
+            noData: 'Không có dữ liệu',
         },
 
         menuList: {
@@ -74,6 +75,8 @@ export const resourceCukcuk = {
             btnStore: 'Cất',
             btnStoreAndAdd: 'Cất & thêm',
             btnHelp: 'Giúp',
+            btnAddRow: 'Thêm dòng',
+            btnDelRow: 'Xóa dòng',
         }
     },
 
