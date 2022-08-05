@@ -906,16 +906,28 @@ export default {
      * Filter Money in Form Detail
      * Author: VQPhong (20/07/2022)
      */
-    "formInfo.FoodPrice": function (val) {
-      this.formInfo.FoodPrice = filterFromMoney(val);
+    "formInfo.FoodPrice": function (newValue, oldValue) {
+      if (newValue) {
+        if (newValue.toString().length > 18) {
+          this.formInfo.FoodPrice = filterFromMoney(oldValue);
+        } else {
+          this.formInfo.FoodPrice = filterFromMoney(newValue);
+        }
+      }
     },
 
     /**
      * Filter Money in Form Detail
      * Author: VQPhong (20/07/2022)
      */
-    "formInfo.FoodInvest": function (val) {
-      this.formInfo.FoodInvest = filterFromMoney(val);
+    "formInfo.FoodInvest": function (newValue, oldValue) {
+      if (newValue) {
+        if (newValue.toString().length > 18) {
+          this.formInfo.FoodInvest = filterFromMoney(oldValue);
+        } else {
+          this.formInfo.FoodInvest = filterFromMoney(newValue);
+        }
+      }
     },
 
     /**
@@ -1249,7 +1261,7 @@ export default {
 
           // Actually this place of processing has not been correct
           if (cur.isCurrentFavorChanging) {
-            console.log('???');
+            console.log("???");
             let textFavorService;
 
             if (cur.currentFavorService.length > 0) {
@@ -1266,7 +1278,7 @@ export default {
               textFavorService
             );
           } else {
-            console.log('không hề update favor');
+            console.log("không hề update favor");
             res = await updateModelById(
               "v1",
               "Foods",

@@ -223,6 +223,7 @@ export default {
       "pageSize",
       "dataFoodPaging",
       "reloadFlag",
+      "totalPages"
     ]),
   },
 
@@ -242,7 +243,10 @@ export default {
      * Call paging API again when pageIndex changed
      * Author: VQPhong (17/07/2022)
      */
-    pageIndex: function () {
+    pageIndex: function (value) {
+      if (value > this.totalPages) {
+        this.pageIndex = this.totalPages;
+      }
       this.getFoodPaging();
     },
 

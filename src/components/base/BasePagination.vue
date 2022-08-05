@@ -29,9 +29,17 @@
         <div class="page-text">Trang</div>
 
         <div class="field-page-index">
-          <div class="field-inside">
-            <input type="text" disabled v-model="pageIndex" />
-          </div>
+          <form
+            @submit="submitPageIndex"
+            :class="{ fieldInside: true, focus: isFocusPageIndex }"
+          >
+            <input
+              type="text"
+              v-model="tempPageIndex"
+              @focusin="isFocusPageIndex = true"
+              @blur="blurEvent"
+            />
+          </form>
         </div>
 
         <div class="total-page">
@@ -141,11 +149,36 @@ export default {
         { selected: true, value: 100 },
       ],
 
+      tempPageIndex: 1,
+      isFocusPageIndex: false,
+
       noData: resourceCukcuk.VI.message.noData,
     };
   },
 
   methods: {
+    /**
+     * Author: VQPhong (05/08/2022)
+     * Blur event of input page index
+     */
+    blurEvent() {
+      this.isFocusPageIndex = false;
+      if (this.tempPageIndex < 1 || this.tempPageIndex > this.totalPages) {
+        this.tempPageIndex = this.pageIndex;
+      }
+    },
+
+    /**
+     * Author: VQPhong (05/08/2022)
+     * Event submit to change page index
+     */
+    submitPageIndex(event) {
+      event.preventDefault();
+      if (this.tempPageIndex > 0 && this.tempPageIndex <= this.totalPages) {
+        this.changePageIndex(this.tempPageIndex);
+      }
+    },
+
     /**
      * Event change PageSize
      * Author: VQPhong (17/07/2022)
@@ -311,13 +344,17 @@ export default {
   height: 24px;
 }
 
-.field-page-index .field-inside {
+.field-page-index .fieldInside {
   border-width: 1px;
   border-style: solid;
   border-color: #c1c1c1 #d9d9d9 #d9d9d9;
 }
 
-.field-page-index .field-inside input {
+.field-page-index .fieldInside.focus {
+  border-color: #0071c1;
+}
+
+.field-page-index .fieldInside input {
   color: #000;
   padding: 3px 5px 3px;
   background-color: #fff;
@@ -325,6 +362,7 @@ export default {
   border: none;
   font-size: 12px;
   font-weight: normal;
+  outline: none;
 }
 
 .reload-btn {
