@@ -19,3 +19,8 @@ export const getPaging = async (edition, model, pageIndex, pageSize, codeFilter,
     const res = await getDataApi(`${edition}/${model}/filter?pageIndex=${pageIndex}&pageSize=${pageSize}&codeFilter=${codeFilter}&nameFilter=${nameFilter}&groupFilter=${groupFilter}&unitFilter=${unitFilter}&priceFilter=${priceFilter}`);
     return res;
 }
+
+export const getCheckDuplicatedCode = async (edition, model, code) => {
+    const res = await getDataApi(`${edition}/${model}/Codes/${code}`);
+    return res;
+}

@@ -681,12 +681,14 @@ import { reactive, toRefs } from "vue";
 import { createFullModel } from "@/utils/call_apis/Post";
 import { updateFullModelById, updateModelById } from "@/utils/call_apis/Put";
 import { requireFoodFields } from "@/utils/constants";
-import { getAll, getById } from "@/utils/call_apis/Get";
+import { getById, getCheckDuplicatedCode } from "@/utils/call_apis/Get";
 import {
-  genCodeFromName,
   filterFromMoney,
   filterToMoney,
   concatObject,
+  genCode_3,
+  genCode_1,
+  genCode_2,
 } from "@/utils/commonFunc";
 import AddGroupForm from "./AddGroupForm.vue";
 import AddUnitForm from "./AddUnitForm.vue";
@@ -798,7 +800,6 @@ export default {
       isOptionUnit: false,
       isOptionPlace: false,
 
-      tempAutoCode: "",
       timeoutFoodName: null,
       timeoutOpenForm: null,
 
@@ -931,20 +932,6 @@ export default {
     },
 
     /**
-     * Auto Generate FoodCode from FoodName
-     * Author: VQPhong (21/07/2022)
-     */
-    "formInfo.FoodName": function (val) {
-      const cur = this;
-
-      clearTimeout(cur.timeoutFoodName);
-
-      cur.timeoutFoodName = setTimeout(() => {
-        cur.tempAutoCode = genCodeFromName(val);
-      }, 100);
-    },
-
-    /**
      * Filter FoodGroup combobox
      * Author: VQPhong (22/07/2022)
      */
@@ -1046,6 +1033,9 @@ export default {
     /**
      * Event for removing a row in FavorService
      * Author: VQPhong (25/07/2022)
+     *
+     *
+     * TODO: Which row is chosen is popped!
      */
     delRowEvent() {
       this.$store.state.currentFavorService.pop();
@@ -1261,7 +1251,6 @@ export default {
 
           // Actually this place of processing has not been correct
           if (cur.isCurrentFavorChanging) {
-            console.log("???");
             let textFavorService;
 
             if (cur.currentFavorService.length > 0) {
@@ -1345,7 +1334,7 @@ export default {
         const res = await getById("v1", "Foods", id);
 
         // Binding
-        Object.keys(cur.formInfo).forEach((key) => {
+        Object.keys(cur.formInfo).forEach(async (key) => {
           if (
             key === "FoodGroup" ||
             key === "FoodUnit" ||
@@ -1358,24 +1347,16 @@ export default {
               ? (cur.formInfo[key] = 0)
               : (cur.formInfo[key] = res.data.responseData[key]);
           } else if (key === "FoodCode" && cur.isReplication) {
-            const wholeAutoCode = genCodeFromName(
-              res.data.responseData.FoodName,
-              true
-            );
-            const autoCode = genCodeFromName(
-              res.data.responseData.FoodName,
-              false
-            );
-
-            if (
-              res.data.responseData[key] !== wholeAutoCode &&
-              res.data.responseData[key] !== autoCode
+            // Auto Generate code from name when Replica
+            // Call API check duplicate code and then auto generate code
+            if (!await this.isDuplicatedCode(genCode_1(this.formInfo.FoodName))) {
+              this.formInfo.FoodCode = genCode_1(this.formInfo.FoodName);
+            } else if (
+              !await this.isDuplicatedCode(genCode_2(this.formInfo.FoodName))
             ) {
-              cur.formInfo[key] = autoCode;
+              this.formInfo.FoodCode = genCode_2(this.formInfo.FoodName);
             } else {
-              res.data.responseData[key] === autoCode
-                ? (cur.formInfo[key] = wholeAutoCode)
-                : (cur.formInfo[key] = autoCode);
+              this.formInfo.FoodCode = genCode_3(this.formInfo.FoodName);
             }
           } else {
             cur.formInfo[key] = res.data.responseData[key];
@@ -1398,21 +1379,11 @@ export default {
      */
     async isDuplicatedCode(currentCode) {
       try {
-        const res = await getAll("v1", "Foods");
-
-        if (
-          res.data.customStatusCode === enumCukcuk.customizeStatusCode.getOkay
-        ) {
-          for (const food of res.data.responseData) {
-            if (food.FoodCode === currentCode) {
-              return true;
-            }
-          }
-        }
-
-        return false;
+        const res = await getCheckDuplicatedCode("v1", "Foods", currentCode);
+        return res.data.responseData;
       } catch (err) {
         console.log(err);
+        return false;
       }
     },
 
@@ -1420,16 +1391,26 @@ export default {
      * Auto binding Code only when Add New Food
      * Author: VQPhong (21/07/2022)
      */
-    blurInputName() {
+    async blurInputName() {
       if (
         this.modeAction === enumCukcuk.modeAction.post &&
         !this.isReplication
       ) {
-        this.formInfo.FoodCode = this.tempAutoCode;
+        // Call API check duplicate code and then auto generate code
+        if (!(await this.isDuplicatedCode(genCode_1(this.formInfo.FoodName)))) {
+          this.formInfo.FoodCode = genCode_1(this.formInfo.FoodName);
+        } else if (
+          !(await this.isDuplicatedCode(genCode_2(this.formInfo.FoodName)))
+        ) {
+          this.formInfo.FoodCode = genCode_2(this.formInfo.FoodName);
+        } else {
+          this.formInfo.FoodCode = genCode_3(this.formInfo.FoodName);
+        }
       }
     },
 
     /**
+     * Author: VQPhong (08/08/2022)
      * Event check box
      */
     eventNotAppear() {
