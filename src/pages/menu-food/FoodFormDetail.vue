@@ -1347,16 +1347,27 @@ export default {
               ? (cur.formInfo[key] = 0)
               : (cur.formInfo[key] = res.data.responseData[key]);
           } else if (key === "FoodCode" && cur.isReplication) {
-            // Auto Generate code from name when Replica
-            // Call API check duplicate code and then auto generate code
-            if (!await this.isDuplicatedCode(genCode_1(this.formInfo.FoodName))) {
-              this.formInfo.FoodCode = genCode_1(this.formInfo.FoodName);
-            } else if (
-              !await this.isDuplicatedCode(genCode_2(this.formInfo.FoodName))
-            ) {
-              this.formInfo.FoodCode = genCode_2(this.formInfo.FoodName);
-            } else {
+            // If FoodName is just one word
+            if (this.formInfo.FoodName.trim().split(" ").length <= 1) {
               this.formInfo.FoodCode = genCode_3(this.formInfo.FoodName);
+            } else {
+              // Auto Generate code from name when Replica
+              // Call API check duplicate code and then auto generate code
+              if (
+                !(await this.isDuplicatedCode(
+                  genCode_1(this.formInfo.FoodName)
+                ))
+              ) {
+                this.formInfo.FoodCode = genCode_1(this.formInfo.FoodName);
+              } else if (
+                !(await this.isDuplicatedCode(
+                  genCode_2(this.formInfo.FoodName)
+                ))
+              ) {
+                this.formInfo.FoodCode = genCode_2(this.formInfo.FoodName);
+              } else {
+                this.formInfo.FoodCode = genCode_3(this.formInfo.FoodName);
+              }
             }
           } else {
             cur.formInfo[key] = res.data.responseData[key];
@@ -1396,6 +1407,12 @@ export default {
         this.modeAction === enumCukcuk.modeAction.post &&
         !this.isReplication
       ) {
+        // If FoodName is just one word
+        if (this.formInfo.FoodName.trim().split(" ").length <= 1) {
+          this.formInfo.FoodCode = genCode_3(this.formInfo.FoodName);
+          return;
+        }
+
         // Call API check duplicate code and then auto generate code
         if (!(await this.isDuplicatedCode(genCode_1(this.formInfo.FoodName)))) {
           this.formInfo.FoodCode = genCode_1(this.formInfo.FoodName);
@@ -2009,6 +2026,10 @@ fieldset {
 .main-body-favor-service .grid-panel {
   height: calc(100% - 2px);
   overflow: unset;
+}
+
+.main-body-favor-service span.food-name {
+  font-weight: bold;
 }
 
 table thead {
