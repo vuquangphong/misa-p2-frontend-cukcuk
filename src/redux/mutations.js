@@ -35,12 +35,20 @@ export default {
         state.currentFood = currentFood;
     },
 
+    setAllFavorService(state, allFavorService) {
+        state.allFavorService = allFavorService;
+    },
+
     setCurrentFavorService(state, currentFavorService) {
         state.currentFavorService = currentFavorService;
     },
 
     setIsCurrentFavorChanging(state, isCurrentFavorChanging) {
         state.isCurrentFavorChanging = isCurrentFavorChanging;
+    },
+
+    setIsFavorServiceFormOpen(state, isFavorServiceFormOpen) {
+        state.isFavorServiceFormOpen = isFavorServiceFormOpen;
     },
 
     setCurrentTotalNumberFood(state, currentTotalNumberFood) {

@@ -10,8 +10,8 @@ export const getById = async (edition, model, id) => {
     return res;
 }
 
-export const getChildrenById = async (edition, model, parentModel, parentId) => {
-    const res = await getDataApi(`${edition}/${model}/${parentModel}/${parentId}`);
+export const getDetailsByMasterId = async (edition, detail, master, masterId) => {
+    const res = await getDataApi(`${edition}/${detail}/${master}/${masterId}`);
     return res;
 }
 

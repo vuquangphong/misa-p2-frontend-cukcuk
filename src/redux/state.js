@@ -10,9 +10,11 @@ export default {
 
     currentFood: '',
     currentTotalNumberFood: 0,
-    
+
+    allFavorService: [],
     currentFavorService: [],
     isCurrentFavorChanging: false,
+    isFavorServiceFormOpen: false,
 
     foodGroup: [],
     foodUnit: [],

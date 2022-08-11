@@ -45,6 +45,9 @@ export const resourceCukcuk = {
             unitName: 'Đơn vị tính',
 
             placeName: 'Nơi chế biến',
+
+            favorContent: 'Sở thích phục vụ',
+            favorSurcharge: 'Thu thêm'
         },
 
         formLabels: {
@@ -53,6 +56,7 @@ export const resourceCukcuk = {
             titleFormAddGroup: 'Thêm Nhóm thực đơn',
             titleFormAddUnit: 'Thêm Đơn vị tính',
             titleFormAddPlace: 'Thêm Bếp/Bar',
+            titleFormAddFavorService: 'Thêm Sở thích phục vụ',
             generalTab: 'Thông tin chung',
             favorServiceTab: 'Sở thích phục vụ',
             titleAlertDel: 'CUKCUK - Quản lý nhà hàng',

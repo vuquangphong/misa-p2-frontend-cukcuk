@@ -16,6 +16,7 @@ export const enumCukcuk = {
         deleted: 13,
         noContent: 14,
         badRequest: 40,
+        transactionException: 50,
         normalException: 55,
     },
 }

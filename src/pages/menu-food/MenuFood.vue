@@ -15,6 +15,9 @@
     <div class="loader">
       <BaseLoader />
     </div>
+
+    <!-- Adding FavorService form here -->
+    <AddFavorServiceForm />
   </div>
 </template>
 
@@ -22,7 +25,8 @@
 import ContentPanel from "@/components/layouts/ContentPanel.vue";
 import MenuNav from "@/components/layouts/MenuNav.vue";
 import HeaderBar from "@/components/layouts/HeaderBar.vue";
-import BaseLoader from '../../components/base/BaseLoader.vue';
+import BaseLoader from "../../components/base/BaseLoader.vue";
+import AddFavorServiceForm from "./AddFavorServiceForm.vue";
 
 export default {
   /**
@@ -33,9 +37,16 @@ export default {
     this.$store.dispatch("getFoodGroup");
     this.$store.dispatch("getFoodUnit");
     this.$store.dispatch("getFoodPlace");
+    this.$store.dispatch("getAllFavorService");
   },
 
-  components: { ContentPanel, MenuNav, HeaderBar, BaseLoader },
+  components: {
+    ContentPanel,
+    MenuNav,
+    HeaderBar,
+    BaseLoader,
+    AddFavorServiceForm,
+  },
 };
 </script>
 

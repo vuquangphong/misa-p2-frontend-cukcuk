@@ -138,7 +138,7 @@ export default {
             });
 
             // reset current favorite service
-            this.changeCurrentFavorService(food.FoodID);
+            this.getFavorServiceByFoodId(food.FoodID);
 
             break;
           }
@@ -154,7 +154,7 @@ export default {
       "changeIsBinding",
       "changeReloadFlag",
       "beingModify",
-      "changeCurrentFavorService",
+      "getFavorServiceByFoodId",
       "emptyCurrentFavorService",
     ]),
   },

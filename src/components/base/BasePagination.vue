@@ -156,6 +156,16 @@ export default {
     };
   },
 
+  watch: {
+    /**
+     * Author: VQPhong (08/08/2022)
+     * Change tempPageIndex corresponding pageIndex
+     */
+    pageIndex: function (value) {
+      this.tempPageIndex = value;
+    },
+  },
+
   methods: {
     /**
      * Author: VQPhong (05/08/2022)
@@ -300,8 +310,18 @@ export default {
   margin-right: 8px;
 }
 
+.changePage:hover {
+  border-color: #d8d8d8;
+  background-color: #ebebeb;
+}
+
 .changePage.disabled {
   opacity: 0.5;
+}
+
+.changePage.disabled {
+  border-color: transparent;
+  background-color: transparent;
 }
 
 .changePage .icon {

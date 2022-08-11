@@ -357,9 +357,6 @@ export default {
             res.data.responseData.TotalRecordsInPage
           );
         }
-
-        // cur.changeCurrentFavorService(firstFoodId);
-
         cur.controlLoader();
       } catch (err) {
         cur.controlLoader();
@@ -394,7 +391,6 @@ export default {
     chooseFood({ FoodID, FoodCode, FoodName, Selected }) {
       this.changeCurrentFood("");
       this.changeCurrentFood({ FoodID, FoodCode, FoodName });
-      this.changeCurrentFavorService(FoodID);
 
       if (!Selected) {
         let checkBreak = 0;
@@ -422,6 +418,7 @@ export default {
      */
     displayFood({ FoodID, FoodCode, FoodName, Selected }) {
       this.chooseFood({ FoodID, FoodCode, FoodName, Selected });
+      this.getFavorServiceByFoodId(FoodID);
       this.stopReplication();
       this.beingModify();
       this.changeIsBinding();
@@ -460,7 +457,7 @@ export default {
       "changeGroupFilter",
       "changeUnitFilter",
       "changePriceFilter",
-      "changeCurrentFavorService",
+      "getFavorServiceByFoodId",
     ]),
   },
 };

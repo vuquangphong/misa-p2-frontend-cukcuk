@@ -1,5 +1,5 @@
 <template>
-  <div class="add-form-container" v-show="isOpenExtraForm">
+  <div class="add-form-container" v-if="isFavorServiceFormOpen">
     <div class="add-form">
       <div class="form-header">
         <div class="form-header-inside">
@@ -17,39 +17,43 @@
               <div class="main-body-general">
                 <div class="list-input-container">
                   <div class="list-input">
-                    <div class="x-field name">
+                    <div class="x-field content">
                       <div class="label-input">
                         <div class="label-input-inside">
-                          <span>{{ labels.unitName }}</span>
+                          <span>{{ labels.favorContent }}</span>
                           <span class="required">&nbsp;(*)</span>
                         </div>
                       </div>
-                      <div class="input">
-                        <div class="input-container">
+                      <div class="text-area">
+                        <div class="text-area-container">
                           <div
                             :class="{
-                              inputLabel: true,
-                              focus: isFocusName,
-                              alert: isEmptyName,
+                              textArea: true,
+                              focus: isFocusContent,
+                              alert: isEmptyContent,
                             }"
                           >
-                            <input
-                              type="text"
-                              v-model="formInfo.FoodUnitName"
-                              @focusin="focusinEvent('Name', true)"
-                              @focusout="focusoutEvent('Name', true)"
+                            <textarea
+                              name=""
+                              id=""
+                              v-model="formInfo.Content"
+                              @focusin="focusinEvent('Content', true)"
+                              @focusout="focusoutEvent('Content', true)"
                               ref="firstInput"
-                            />
+                            ></textarea>
                           </div>
 
                           <div
                             class="required-alert"
-                            v-if="isEmptyName"
-                            @mouseover="isShowAlertName = true"
-                            @mouseleave="isShowAlertName = false"
+                            v-if="isEmptyContent"
+                            @mouseover="isShowAlertContent = true"
+                            @mouseleave="isShowAlertContent = false"
                           >
                             <div class="alert-icon"></div>
-                            <div class="alert-hover" v-show="isShowAlertName">
+                            <div
+                              class="alert-hover"
+                              v-show="isShowAlertContent"
+                            >
                               <div class="alert-hover-inside">
                                 <div class="icon"></div>
                                 <div class="message">{{ alertRequired }}</div>
@@ -60,24 +64,32 @@
                       </div>
                     </div>
 
-                    <div class="x-field description">
+                    <div class="x-field surcharge">
                       <div class="label-input">
                         <div class="label-input-inside">
-                          <span>{{ labels.descriptionExtra }}</span>
+                          <span>{{ labels.favorSurcharge }}</span>
                         </div>
                       </div>
-                      <div :class="{ input: true, focus: isFocusDescription }">
-                        <div class="textArea">
-                          <textarea
-                            name=""
-                            id=""
-                            v-model="formInfo.Description"
-                            @focusin="focusinEvent('Description', false)"
-                            @focusout="focusoutEvent('Description', false)"
-                          ></textarea>
+                      <div class="input">
+                        <div class="input-container">
+                          <div
+                            :class="{
+                              inputLabel: true,
+                              focus: isFocusSurcharge,
+                            }"
+                          >
+                            <input
+                              type="text"
+                              v-model="formInfo.Surcharge"
+                              @focusin="focusinEvent('Surcharge', false)"
+                              @focusout="focusoutEvent('Surcharge', false)"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
+
+                    <!-- Maybe "Group of FavorService" -->
                   </div>
                 </div>
               </div>
@@ -117,21 +129,23 @@
     </div>
 
     <DuplicatedMessage
-      :isAlert="isAlertDuplicatedName"
-      :currentCode="formInfo.FoodUnitName"
-      :model="'Đơn vị tính'"
-      @closeMessage="isAlertDuplicatedName = false"
+      :isFavorService="true"
+      :isAlert="isAlertDuplicated"
+      :favorContent="formInfo.Content"
+      :favorSurcharge="formInfo.Surcharge"
+      @closeMessage="isAlertDuplicated = false"
     />
   </div>
 </template>
 
 <script>
-import { resourceCukcuk } from "@/utils/resourceCukcuk";
 import { reactive, toRefs } from "@vue/reactivity";
-import { enumCukcuk } from "@/utils/enumCukcuk";
-import { mapActions, mapGetters } from "vuex";
-import { createModel } from "@/utils/call_apis/Post";
 import DuplicatedMessage from "./DuplicatedMessage.vue";
+import { mapActions, mapGetters } from "vuex";
+import { resourceCukcuk } from "@/utils/resourceCukcuk";
+import { enumCukcuk } from "@/utils/enumCukcuk";
+import { createModel } from "@/utils/call_apis/Post";
+import { filterFromMoney, filterToMoney } from "@/utils/commonFunc";
 
 export default {
   components: { DuplicatedMessage },
@@ -139,51 +153,47 @@ export default {
   setup() {
     const state = reactive({
       formInfo: {
-        FoodUnitName: "",
-        Description: "",
+        Content: "",
+        Surcharge: 0,
       },
     });
 
     return { ...toRefs(state) };
   },
 
-  props: ["isOpenExtraForm"],
-
   data() {
     return {
-      msgNoFunction: resourceCukcuk.VI.message.noFunction,
+      isAlertDuplicated: false,
+      alertInterrupt: false,
+      timeout: null,
+      isFocusContent: false,
+      isFocusSurcharge: false,
+      isEmptyContent: false,
+      isShowAlertContent: false,
+
       labels: resourceCukcuk.VI.tableHeader,
-      formTitle: resourceCukcuk.VI.formLabels.titleFormAddUnit,
+      formTitle: resourceCukcuk.VI.formLabels.titleFormAddFavorService,
       alertRequired: resourceCukcuk.VI.message.alertRequired,
-      alertErrorMsg: resourceCukcuk.VI.message.generalErrMsg,
-
-      isFocusName: false,
-      isFocusDescription: false,
-
-      isEmptyName: false,
-
-      isShowAlertName: false,
 
       btnHelp: resourceCukcuk.VI.buttons.btnHelp,
       btnStore: resourceCukcuk.VI.buttons.btnStore,
       btnCancel: resourceCukcuk.VI.buttons.btnCancel,
 
-      timeout: null,
-      alertInterrupt: false,
-      isAlertDuplicatedName: false,
+      msgNoFunction: resourceCukcuk.VI.message.noFunction,
+      alertErrorMsg: resourceCukcuk.VI.message.generalErrMsg,
     };
   },
 
   computed: {
-    ...mapGetters(["foodUnit"]),
+    ...mapGetters(["isFavorServiceFormOpen", "allFavorService"]),
   },
 
   watch: {
     /**
-     * Author: VQPhong (14/07/2022)
-     * Clear form when this form close/open
+     * Author: VQPhong (10/08/2022)
+     * Clear form and focus on first input when this form close/open
      */
-    isOpenExtraForm: function (value) {
+    isFavorServiceFormOpen: function (value) {
       const cur = this;
 
       if (!value) {
@@ -198,12 +208,26 @@ export default {
 
       cur.isEmptyName = false;
     },
+
+    /**
+     * Author: VQPhong (11/08/2022)
+     *
+     */
+    "formInfo.Surcharge": function (newValue, oldValue) {
+      if (newValue) {
+        if (newValue.toString().length > 18) {
+          this.formInfo.Surcharge = filterFromMoney(oldValue);
+        } else {
+          this.formInfo.Surcharge = filterFromMoney(newValue);
+        }
+      }
+    },
   },
 
   methods: {
     /**
      * Alert no function
-     * Author: VQPhong (14/07/2022)
+     * Author: VQPhong (10/08/2022)
      */
     noFunction() {
       alert(this.msgNoFunction);
@@ -214,7 +238,7 @@ export default {
      * Author: VQPhong (22/07/2022)
      */
     closeForm() {
-      this.$emit("closeExtraForm", null);
+      this.closeFavorServiceForm();
     },
 
     /**
@@ -239,8 +263,15 @@ export default {
 
       // Check if required field is empty
       if (required) {
-        if (!this.formInfo[`FoodUnit${field}`]) {
+        if (!this.formInfo[`${field}`]) {
           this[`isEmpty${field}`] = true;
+        }
+      }
+
+      // For money
+      if (field === "Surcharge") {
+        if (!this.formInfo.Surcharge) {
+          this.formInfo.Surcharge = 0;
         }
       }
     },
@@ -266,34 +297,34 @@ export default {
       cur.alertInterrupt = false;
 
       let formPost = {
-        FoodUnitName: cur.formInfo.FoodUnitName,
-        Description: cur.formInfo.Description,
+        Content: cur.formInfo.Content,
+        Surcharge: cur.formInfo.Surcharge,
       };
 
       // Validate Compulsory fields
-      if (!formPost.FoodUnitName) {
-        cur.isEmptyName = true;
+      if (!formPost.Content) {
+        cur.isEmptyContent = true;
         cur.alertInterrupt = true;
       }
 
       if (cur.alertInterrupt) return;
 
-      // Check if FoodUnitName is duplicated
-      if (cur.isDuplicatedName(formPost.FoodUnitName)) {
+      // Check if current FavorService is duplicated
+      if (cur.isDuplicatedFavor(formPost.Content, formPost.Surcharge)) {
         cur.alertInterrupt = true;
-        cur.isAlertDuplicatedName = true;
+        cur.isAlertDuplicated = true;
         return;
       }
 
       try {
         cur.controlLoader();
 
-        const res = await createModel("v1", "FoodUnits", formPost);
+        const res = await createModel("v1", "FavorServices", formPost);
 
         if (
           res.data.customStatusCode === enumCukcuk.customizeStatusCode.created
         ) {
-          cur.$store.dispatch("getFoodUnit");
+          cur.$store.dispatch("getAllFavorService");
           cur.alertInterrupt = false;
         }
 
@@ -307,29 +338,39 @@ export default {
 
     /**
      * Clear all field
-     * Author: VQPhong (18/07/2022)
+     * Author: VQPhong (11/08/2022)
      */
     clearForm() {
       Object.keys(this.formInfo).forEach((key) => {
-        this.formInfo[key] = "";
+        if (key === "Surcharge") {
+          this.formInfo[key] = 0;
+        } else {
+          this.formInfo[key] = "";
+        }
       });
     },
 
     /**
-     * Check if the FoodUnitName is duplicated.
-     * Author: VQPhong (19/07/2022)
+     * Check if the current FavorService is duplicated.
+     * Author: VQPhong (11/08/2022)
      */
-    isDuplicatedName(currentName) {
-      let tempName = currentName.toLowerCase();
-      for (const unit of this.foodUnit) {
-        if (tempName === unit.FoodUnitName.toLowerCase()) {
+    isDuplicatedFavor(content, surcharge) {
+      let tempContent = content.toLowerCase();
+      let tempSurcharge = filterToMoney(surcharge);
+
+      for (const item of this.allFavorService) {
+        if (
+          tempContent === item.Content.toLowerCase() &&
+          tempSurcharge === item.Surcharge
+        ) {
           return true;
         }
       }
+
       return false;
     },
 
-    ...mapActions(["controlLoader"]),
+    ...mapActions(["controlLoader", "closeFavorServiceForm"]),
   },
 };
 </script>
@@ -350,12 +391,12 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  height: 158px;
-  min-height: 158px;
-  max-height: 158px;
-  width: 420px;
-  max-width: 420px;
-  min-width: 420px;
+  height: 160px;
+  min-height: 160px;
+  max-height: 160px;
+  width: 450px;
+  max-width: 450px;
+  min-width: 450px;
   background-color: #fff;
   border: 5px solid #0072bc;
 }
@@ -402,6 +443,7 @@ export default {
 .form-body .form-panel-container {
   padding: 8px;
   height: 76px;
+  height: 79px;
 }
 
 .form-panel {
@@ -461,7 +503,7 @@ export default {
 
 .x-field .label-input {
   font-size: 13px;
-  width: 105px;
+  width: 185px;
 }
 
 .label-input-inside {
@@ -472,31 +514,37 @@ export default {
   color: red;
 }
 
-.x-field .input {
+.x-field .input,
+.x-field .text-area {
   height: 100%;
   flex: 1;
 }
 
-.x-field.description {
+.x-field.content {
   height: 50px;
 }
 
-.x-field.description .input {
+.x-field.content .textArea {
   border-width: 1px;
   border-style: solid;
   border-color: #c1c1c1 #d9d9d9 #d9d9d9;
+  width: 100%;
 }
 
-.x-field.description .input.focus {
+.x-field.content .textArea.focus {
   border-color: #0071c1;
 }
 
-.x-field.description .input .textArea {
+.x-field.content .textArea.alert {
+  border-color: red;
+}
+
+.x-field.content .textArea {
   padding: 3px 5px 3px;
 }
 
-.description textarea {
-  min-height: 48px;
+.content textarea {
+  min-height: 39px;
   color: #000;
   padding: 0;
   outline: none;
@@ -518,6 +566,7 @@ export default {
   width: 100%;
   height: 100%;
   display: flex;
+  align-items: flex-end;
 }
 
 .right-buttons {
@@ -596,146 +645,12 @@ export default {
   margin-left: 8px;
 }
 
-.avatar-container {
-  width: calc(100% - 514px);
-}
-
-fieldset {
-  padding: 0px 8px 8px;
-  border: 1px solid #afafaf;
-  height: 185px;
-  position: relative;
-}
-
-.fieldset-header {
-  position: absolute;
-  top: -11px;
-  left: 8px;
-  padding: 0 3px 1px;
-  line-height: 16px;
-  color: #000;
-  font-size: 13px;
-  font-weight: normal;
-  background-color: #fff;
-}
-
-.fieldset-header .title {
-  padding: 1px 0;
-}
-
-.fieldset-body {
-  display: flex;
-  width: 100%;
-  margin-top: 12px;
-}
-
-.fieldset-body .panel-default {
-  width: 160px;
-  margin-right: 4px;
-  position: relative;
-}
-
-.panel-default .theme {
-  padding-bottom: 8px;
-}
-
-.panel-default img {
-  height: 120px;
-  width: 160px;
-}
-
-.panel-default .guide {
-  text-align: center;
-  font-size: 12px;
-}
-
-.panel-default .guide div + div {
-  padding-top: 2px;
-  font-weight: bold;
-}
-
-.panel-default .select-icon {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 110px;
-  height: 25px;
-}
-
-.select-icon-inside {
-  background-color: #fcfcfc;
-  border: 1px solid #ccc;
-  padding: 3px;
-  height: calc(100% - 8px);
-  cursor: pointer;
-}
-
-.select-icon-inside:hover {
-  border-color: #1064a1;
-}
-
-.select-icon-inside .content {
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-}
-
-.select-icon-inside .content .icon {
-  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/menu/selectIconMenu.png")
-    no-repeat 3px center;
-  width: 16px;
-  height: 16px;
-}
-
-.select-icon-inside .content .title {
-  font-size: 12px;
-  color: #026b97;
-  font-weight: normal;
-  padding: 0 5px;
-}
-
-.fieldset-body .panel-extend {
-  width: calc(100% - 164px);
-}
-
-.panel-extend .select-img,
-.panel-extend .remove-img {
-  height: 25px;
-  width: 27px;
-  margin-bottom: 4px;
-}
-
-.panel-extend .inside {
-  background-color: #fcfcfc;
-  border: 1px solid #ccc;
-  padding: 3px;
-  text-align: center;
-  color: #000;
-  font-size: 13px;
-  font-weight: normal;
-  height: calc(100% - 8px);
-  cursor: pointer;
-}
-
-.panel-extend .inside:hover {
-  border-color: #0071c1;
-  background-image: -webkit-linear-gradient(top, #eff0ec, #eff2e9);
-}
-
-.remove-img img {
-  width: 11px;
-}
-
-.main-body-favor-service {
-  padding-top: 200px;
-  text-align: center;
-  font-weight: 600;
-  font-size: x-large;
-}
-
 .input-container {
   height: 24px;
+  display: flex;
+}
+
+.text-area-container {
   display: flex;
 }
 
@@ -752,11 +667,6 @@ fieldset {
 
 .inputLabel.focus {
   border-color: #0071c1;
-}
-
-.inputLabel.alert {
-  width: calc(100% - 26px);
-  border-color: red;
 }
 
 .inputLabel input {
@@ -810,5 +720,9 @@ fieldset {
 
 .alert-hover .message {
   font-size: 13px;
+}
+
+.x-field.surcharge input {
+  text-align: right;
 }
 </style>

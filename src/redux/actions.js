@@ -1,4 +1,4 @@
-import { getAll, getChildrenById } from "@/utils/call_apis/Get";
+import { getAll, getDetailsByMasterId } from "@/utils/call_apis/Get";
 import { filterFromMoney } from "@/utils/commonFunc";
 
 export default {
@@ -50,15 +50,35 @@ export default {
         commit('setCurrentFood', payload);
     },
 
-    async changeCurrentFavorService({ commit }, payload) {
+    async getAllFavorService({ commit }) {
         try {
-            const res = await getChildrenById('v1', "FavorServices", "Foods", payload);
+            const res = await getAll('v1', 'FavorServices');
+
+            let tempData = res.data.responseData.map(item => {
+                return {
+                    FavorServiceID: item.FavorServiceID,
+                    Content: item.Content,
+                    Surcharge: item.Surcharge,
+                }
+            });
+
+            commit('setAllFavorService', tempData);
+        } catch (err) {
+            commit('setAllFavorService', []);
+            console.log(err);
+        }
+    },
+
+    async getFavorServiceByFoodId({ commit }, payload) {
+        try {
+            const res = await getDetailsByMasterId('v1', "FavorServices", "Foods", payload);
 
             let tempCurService;
 
             if (res.data.responseData.length) {
-                tempCurService = res.data.responseData.map((e) => {
-                    return { Content: e.Content, Surcharge: filterFromMoney(e.Surcharge) };
+                tempCurService = res.data.responseData.map((e, index) => {
+                    let Selected = index === 0 ? true : false;
+                    return { Index: index, FavorServiceID: e.FavorServiceID, Content: e.Content, Surcharge: filterFromMoney(e.Surcharge), Selected };
                 });
             } else {
                 tempCurService = [];
@@ -70,6 +90,9 @@ export default {
             console.log(err);
         }
     },
+    changeCurrentFavorService({ commit }, payload) {
+        commit('setCurrentFavorService', payload);
+    },
 
     emptyCurrentFavorService({ commit }) {
         commit('setCurrentFavorService', []);
@@ -77,6 +100,13 @@ export default {
 
     changeIsCurrentFavorChanging({ commit }, payload) {
         commit('setIsCurrentFavorChanging', payload);
+    },
+
+    openFavorServiceForm({ commit }) {
+        commit('setIsFavorServiceFormOpen', true);
+    },
+    closeFavorServiceForm({ commit }) {
+        commit('setIsFavorServiceFormOpen', false);
     },
 
     changeCurrentTotalNumberFood({ commit }, payload) {

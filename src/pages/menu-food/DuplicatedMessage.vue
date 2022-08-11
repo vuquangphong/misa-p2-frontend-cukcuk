@@ -11,11 +11,19 @@
           <div class="content" v-if="isCode">
             Mã
             <span>&lt;{{ currentCode }}&gt;</span>
-            đã tồn tại trong danh sách {{ model }}, vui lòng kiểm tra lại.
+            đã tồn tại trong danh sách {{ model }}. Bạn vui lòng kiểm tra lại.
+          </div>
+
+          <div class="content" v-else-if="isFavorService">
+            Sở thích phục vụ
+            <span
+              >&lt;&lt;{{ favorContent }} - {{ favorSurcharge }}&gt;&gt;</span
+            >
+            đã tồn tại. Bạn vui lòng kiểm tra lại.
           </div>
 
           <div class="content" v-else>
-            {{model}}
+            {{ model }}
             <span>&lt;{{ currentCode }}&gt;</span>
             đã tồn tại.
           </div>
@@ -23,9 +31,13 @@
       </div>
 
       <div class="footer">
-        <div class="button" @click="$emit('closeMessage', null)">
+        <button
+          class="button"
+          @click="$emit('closeMessage', null)"
+          ref="autoFocus"
+        >
           <div class="content">{{ agree }}</div>
-        </div>
+        </button>
       </div>
     </div>
   </div>
@@ -34,13 +46,37 @@
 <script>
 import { resourceCukcuk } from "@/utils/resourceCukcuk";
 export default {
-  props: ["isAlert", "currentCode", "model", 'isCode'],
+  props: [
+    "isAlert",
+    "currentCode",
+    "model",
+    "isCode",
+    "isFavorService",
+    "favorContent",
+    "favorSurcharge",
+  ],
 
   data() {
     return {
       agree: resourceCukcuk.VI.buttons.btnAgree,
       title: resourceCukcuk.VI.formLabels.titleAlertDel,
+
+      timeout: null,
     };
+  },
+
+  watch: {
+    /**
+     * Author: VQPhong (11/08/2022)
+     * Auto focus button "Agree"
+     */
+    isAlert: function (value) {
+      if (value) {
+        this.timeout = setTimeout(() => {
+          this.$refs.autoFocus.focus();
+        }, 100);
+      }
+    },
   },
 };
 </script>
@@ -124,6 +160,12 @@ export default {
 .footer .button:hover {
   background-image: -webkit-linear-gradient(top, #eff0ee, #e1f2ec);
   border-color: #0072bc;
+}
+
+.footer .button:focus-visible, .footer .button:focus {
+  background-image: -webkit-linear-gradient(top, #eff0ee, #e1f2ec);
+  border-color: #0072bc;
+  outline: none;
 }
 
 .footer .button .content {

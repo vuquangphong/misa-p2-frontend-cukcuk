@@ -568,6 +568,7 @@
                           v-for="(data, index) in currentFavorService"
                           :key="index"
                           :class="{ even: index % 2 === 1 }"
+                          @click="chooseFavorService(data)"
                         >
                           <BaseFavorServiceRow :index="index" />
                         </tr>
@@ -586,7 +587,7 @@
                   <button
                     :class="{
                       button: true,
-                      cannotDel: currentFavorService <= 0,
+                      cannotDel: currentFavorService.length <= 0,
                     }"
                     @click="delRowEvent"
                   >
@@ -678,17 +679,17 @@ import { resourceCukcuk } from "@/utils/resourceCukcuk";
 import { mapActions, mapGetters } from "vuex";
 import { enumCukcuk } from "@/utils/enumCukcuk";
 import { reactive, toRefs } from "vue";
-import { createFullModel } from "@/utils/call_apis/Post";
-import { updateFullModelById, updateModelById } from "@/utils/call_apis/Put";
+import { createMasterDetail } from "@/utils/call_apis/Post";
+import { updateMasterDetailById } from "@/utils/call_apis/Put";
 import { requireFoodFields } from "@/utils/constants";
 import { getById, getCheckDuplicatedCode } from "@/utils/call_apis/Get";
 import {
   filterFromMoney,
   filterToMoney,
-  concatObject,
   genCode_3,
   genCode_1,
   genCode_2,
+  filterFavorService,
 } from "@/utils/commonFunc";
 import AddGroupForm from "./AddGroupForm.vue";
 import AddUnitForm from "./AddUnitForm.vue";
@@ -1027,18 +1028,62 @@ export default {
      * Author: VQPhong (25/07/2022)
      */
     addRowEvent() {
-      this.$store.state.currentFavorService.push({ Content: "", Surcharge: 0 });
+      let payload = this.currentFavorService;
+
+      payload.push({
+        Index: this.currentFavorService.length,
+        FavorServiceID: 0,
+        Content: "",
+        Surcharge: 0,
+        Selected: false,
+      });
+
+      if (payload.length === 1) {
+        payload[0].Selected = true;
+      }
+
+      this.changeCurrentFavorService(payload);
     },
 
     /**
      * Event for removing a row in FavorService
-     * Author: VQPhong (25/07/2022)
-     *
-     *
-     * TODO: Which row is chosen is popped!
+     * Author: VQPhong (09/08/2022)
      */
     delRowEvent() {
-      this.$store.state.currentFavorService.pop();
+      let payload = this.currentFavorService;
+
+      payload = payload.filter((item) => !item.Selected);
+
+      if (payload.length > 0) {
+        payload[0].Selected = true;
+      }
+
+      this.changeCurrentFavorService(payload);
+    },
+
+    /**
+     * Author: VQPhong (09/08/2022)
+     * Event choosing a row of Favorite service
+     */
+    chooseFavorService({ Index, Selected }) {
+      if (!Selected) {
+        let checkBreak = 0;
+        for (const item of this.currentFavorService) {
+          if (item.Selected) {
+            item.Selected = false;
+            checkBreak++;
+            if (checkBreak >= 2) break;
+            else continue;
+          }
+
+          if (item.Index === Index) {
+            item.Selected = true;
+            checkBreak++;
+            if (checkBreak >= 2) break;
+            else continue;
+          }
+        }
+      }
     },
 
     /**
@@ -1073,6 +1118,13 @@ export default {
       if (required) {
         if (!this.formInfo[`Food${field}`]) {
           this[`isEmpty${field}`] = true;
+        }
+      }
+
+      // For money
+      if (field === "Price" || field === "Invest") {
+        if (!this.formInfo[`Food${field}`]) {
+          this.formInfo[`Food${field}`] = 0;
         }
       }
     },
@@ -1178,6 +1230,16 @@ export default {
 
       cur.alertInterrupt = false;
 
+      // TODO: Get the final list of Favorite services
+      let tempFavorServices = filterFavorService(cur.currentFavorService);
+
+      // TODO: Append list of Favorite service into formPost
+
+      // TODO: (just for UPDATE) Get the final list of FavorServiceIDs need to be delete in the intermediate table
+      let tempDelFavorServiceIds = [];
+
+      // TODO: (just for UPDATE) Append this list into formPost
+
       let formPost = {
         FoodName: cur.formInfo.FoodName,
         FoodCode: cur.formInfo.FoodCode,
@@ -1188,6 +1250,8 @@ export default {
         Description: cur.formInfo.Description,
         FoodPlaceID: cur.formInfo.FoodPlace.ID,
         Appear: cur.formInfo.Appear,
+        FavorServices: tempFavorServices,
+        DelFavorServiceIds: tempDelFavorServiceIds,
       };
 
       // Validate Compulsory fields
@@ -1217,24 +1281,21 @@ export default {
         }
       }
 
+      // TODO: Validate list of FavorServices if it is not empty
+      // Duplicated FavorServices
+      // FavorService has a surcharge but no content
+      // [...]
+
       // Everything is Okay
       try {
         cur.controlLoader();
 
         if (cur.modeAction === enumCukcuk.modeAction.post) {
-          let textFavorService;
-
-          if (cur.currentFavorService.length > 0) {
-            textFavorService = concatObject(cur.currentFavorService);
-          } else {
-            textFavorService = "";
-          }
-
-          const res = await createFullModel(
+          const res = await createMasterDetail(
             "v1",
             "Foods",
-            formPost,
-            textFavorService
+            "FavorServices",
+            formPost
           );
 
           if (
@@ -1247,34 +1308,40 @@ export default {
             cur.alertInterrupt = false;
           }
         } else {
-          let res;
-
           // Actually this place of processing has not been correct
-          if (cur.isCurrentFavorChanging) {
-            let textFavorService;
+          // if (cur.isCurrentFavorChanging) {
+          //   let textFavorService;
 
-            if (cur.currentFavorService.length > 0) {
-              textFavorService = concatObject(cur.currentFavorService);
-            } else {
-              textFavorService = "";
-            }
+          //   if (cur.currentFavorService.length > 0) {
+          //     // textFavorService = concatObject(cur.currentFavorService);
+          //   } else {
+          //     textFavorService = "";
+          //   }
 
-            res = await updateFullModelById(
-              "v1",
-              "Foods",
-              formPost,
-              cur.currentFood.FoodID,
-              textFavorService
-            );
-          } else {
-            console.log("không hề update favor");
-            res = await updateModelById(
-              "v1",
-              "Foods",
-              cur.currentFood.FoodID,
-              formPost
-            );
-          }
+          //   res = await updateFullModelById(
+          //     "v1",
+          //     "Foods",
+          //     formPost,
+          //     cur.currentFood.FoodID,
+          //     textFavorService
+          //   );
+          // } else {
+          //   console.log("không hề update favor");
+          //   res = await updateModelById(
+          //     "v1",
+          //     "Foods",
+          //     cur.currentFood.FoodID,
+          //     formPost
+          //   );
+          // }
+
+          const res = await updateMasterDetailById(
+            "v1",
+            "Foods",
+            "FavorServices",
+            formPost,
+            cur.currentFood.FoodID
+          );
 
           if (
             res.data.customStatusCode === enumCukcuk.customizeStatusCode.updated
@@ -1568,6 +1635,7 @@ export default {
       "changeCurrentFood",
       "stopModify",
       "emptyCurrentFavorService",
+      "changeCurrentFavorService",
     ]),
   },
 };

@@ -111,7 +111,7 @@ export const filterMoney = (value) => {
  * Author: VQPhong (20/07/2022)
  */
 export const filterToMoney = (money) => {
-    return parseFloat(money.split('').filter(c => c !== '.').join(''));
+    return parseFloat(money.toString().split('').filter(c => c !== '.').join(''));
 }
 
 /**
@@ -136,13 +136,21 @@ export const clickOutside = {
 };
 
 /**
- * Concat a object into a string
- * Author: VQPhong (25/07/2022)
+ * Author: VQPhong (10/08/2022)
+ * Ignore favorite services which are empty (Content: "", Surcharge: 0) from list of Favorite service
  */
-export const concatObject = (arr) => {
-    return arr.map(e =>
-        Object.keys(e).map(key =>
-            key === 'Surcharge' ? filterToMoney(e[key]) : e[key]
-        ).join(',')
-    ).join(';');
+export const filterFavorService = (arr) => {
+    if (arr === []) return [];
+
+    let res = [];
+
+    for (const item of arr) {
+        if (!item.Content && (item.Surcharge === 0 || item.Surcharge === '0')) {
+            continue;
+        } else {
+            res.push({ FavorServiceID: item.FavorServiceID, Content: item.Content, Surcharge: filterToMoney(item.Surcharge) });
+        }
+    }
+
+    return res;
 }
