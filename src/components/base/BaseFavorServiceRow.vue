@@ -1,5 +1,5 @@
 <template>
-  <td class="content">
+  <td class="content" ref="flagCoordinateFS">
     <div
       :class="{ insideContent: true, active: activeRowFavor === index }"
       @click="activeEvent"
@@ -46,7 +46,7 @@ export default {
   props: ["index"],
 
   computed: {
-    ...mapGetters(["currentFavorService"]),
+    ...mapGetters(["currentFavorService", "isFSOptionsOpen"]),
   },
 
   data() {
@@ -62,7 +62,6 @@ export default {
      */
     currentFavorService: {
       handler: function (value) {
-        console.log(value);
         if (value.length) {
           // filter money
           if (value[this.index]) {
@@ -113,7 +112,21 @@ export default {
      * Event to open favorite service options
      */
     eventOpenFavorOption() {
-      alert("Tính năng đang phát triển");
+      // Change coordinate of OptionFS
+      let tempRect = this.$refs.flagCoordinateFS.getBoundingClientRect();
+
+      this.changeCoordinateOptionFS({
+        clientX: `${tempRect.x - 1}px`,
+        clientY: `${tempRect.y > 388 ? tempRect.y - 310 : tempRect.y + 24}px`,
+        indexOfRow: this.index,
+      });
+
+      // Open/Close OptionFS
+      if (this.isFSOptionsOpen) {
+        this.closeFSOptions();
+      } else {
+        this.openFSOptions();
+      }
     },
 
     /**
@@ -132,7 +145,13 @@ export default {
       this.openFavorServiceForm();
     },
 
-    ...mapActions(["changeIsCurrentFavorChanging", "openFavorServiceForm"]),
+    ...mapActions([
+      "changeIsCurrentFavorChanging",
+      "openFavorServiceForm",
+      "changeCoordinateOptionFS",
+      "openFSOptions",
+      "closeFSOptions"
+    ]),
   },
 };
 </script>
@@ -169,8 +188,18 @@ input {
   text-align: right;
 }
 
-tr.even input {
+tr.even input,
+tr.even div {
   background-color: #fafafa;
+}
+
+tr:hover input,
+tr:hover div {
+  background-color: #e2eff8;
+}
+
+tr:hover .active input {
+  background-color: #fff;
 }
 
 .surcharge input:focus {

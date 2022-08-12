@@ -18,6 +18,9 @@
 
     <!-- Adding FavorService form here -->
     <AddFavorServiceForm />
+
+    <!-- FS Options is registered here -->
+    <BaseFavorServiceOptions />
   </div>
 </template>
 
@@ -27,6 +30,7 @@ import MenuNav from "@/components/layouts/MenuNav.vue";
 import HeaderBar from "@/components/layouts/HeaderBar.vue";
 import BaseLoader from "../../components/base/BaseLoader.vue";
 import AddFavorServiceForm from "./AddFavorServiceForm.vue";
+import BaseFavorServiceOptions from "../../components/base/BaseFavorServiceOptions.vue";
 
 export default {
   /**
@@ -46,6 +50,7 @@ export default {
     HeaderBar,
     BaseLoader,
     AddFavorServiceForm,
+    BaseFavorServiceOptions,
   },
 };
 </script>

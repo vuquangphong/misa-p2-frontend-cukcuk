@@ -74,7 +74,7 @@ export default {
       if (value) {
         this.timeout = setTimeout(() => {
           this.$refs.autoFocus.focus();
-        }, 100);
+        }, 10);
       }
     },
   },

@@ -15,6 +15,8 @@ export default {
     currentFavorService: state => state.currentFavorService,
     isCurrentFavorChanging: state => state.isCurrentFavorChanging,
     isFavorServiceFormOpen: state => state.isFavorServiceFormOpen,
+    coordinateOptionFS: state => state.coordinateOptionFS,
+    isFSOptionsOpen: state => state.isFSOptionsOpen,
 
     foodGroup: state => state.foodGroup,
     foodUnit: state => state.foodUnit,

@@ -51,6 +51,14 @@ export default {
         state.isFavorServiceFormOpen = isFavorServiceFormOpen;
     },
 
+    setCoordinateOptionFS(state, coordinateOptionFS) {
+        state.coordinateOptionFS = coordinateOptionFS;
+    },
+
+    setIsFSOptionsOpen(state, isFSOptionsOpen) {
+        state.isFSOptionsOpen = isFSOptionsOpen;
+    },
+
     setCurrentTotalNumberFood(state, currentTotalNumberFood) {
         state.currentTotalNumberFood = currentTotalNumberFood;
     },

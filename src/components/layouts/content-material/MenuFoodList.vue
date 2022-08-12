@@ -1,5 +1,5 @@
 <template>
-  <div class="menu-food-list-container" ref="menuFoodList">
+  <div class="menu-food-list-container">
     <div class="grid-view">
       <table>
         <thead>
@@ -426,7 +426,7 @@ export default {
     },
 
     /**
-     * Filter money
+     * Filter money: 1000000 => 1.000.000
      * Author: VQPhong (19/07/2022)
      */
     filterMoney(value) {

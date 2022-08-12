@@ -109,6 +109,17 @@ export default {
         commit('setIsFavorServiceFormOpen', false);
     },
 
+    changeCoordinateOptionFS({ commit }, payload) {
+        commit('setCoordinateOptionFS', payload);
+    },
+
+    openFSOptions({ commit }) {
+        commit('setIsFSOptionsOpen', true);
+    },
+    closeFSOptions({ commit }) {
+        commit('setIsFSOptionsOpen', false);
+    },
+
     changeCurrentTotalNumberFood({ commit }, payload) {
         commit('setCurrentTotalNumberFood', payload);
     },

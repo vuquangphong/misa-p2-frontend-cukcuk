@@ -15,6 +15,12 @@ export default {
     currentFavorService: [],
     isCurrentFavorChanging: false,
     isFavorServiceFormOpen: false,
+    coordinateOptionFS: {
+        clientX: '',
+        clientY: '',
+        indexOfRow: '',
+    },
+    isFSOptionsOpen: false,
 
     foodGroup: [],
     foodUnit: [],

@@ -20,12 +20,12 @@
       </div>
 
       <div class="footer">
-        <div class="button" @click="eventYes">
+        <button class="button" @click="eventYes" ref="autoFocus">
           <div class="content">{{ yesBtn }}</div>
-        </div>
-        <div class="button" @click="closeAlertDelete">
+        </button>
+        <button class="button" @click="closeAlertDelete">
           <div class="content">{{ noBtn }}</div>
-        </div>
+        </button>
       </div>
     </div>
   </div>
@@ -48,7 +48,23 @@ export default {
       yesBtn: resourceCukcuk.VI.buttons.btnYes,
       noBtn: resourceCukcuk.VI.buttons.btnNo,
       alertErrorMsg: resourceCukcuk.VI.message.generalErrMsg,
+
+      timeout: null,
     };
+  },
+
+  watch: {
+    /**
+     * Author: VQPhong (12/08/2022)
+     * Auto focus on Button "Yes" when this form is displayed
+     */
+    isAlertDeleteOpen: function (value) {
+      if (value) {
+        this.timeout = setTimeout(() => {
+          this.$refs.autoFocus.focus();
+        }, 10);
+      }
+    },
   },
 
   methods: {
@@ -176,6 +192,13 @@ export default {
 .footer .button:hover {
   background-image: -webkit-linear-gradient(top, #eff0ee, #e1f2ec);
   border-color: #0072bc;
+}
+
+.footer .button:focus-visible,
+.footer .button:focus {
+  background-image: -webkit-linear-gradient(top, #eff0ee, #e1f2ec);
+  border-color: #0072bc;
+  outline: none;
 }
 
 .footer .button .content {
