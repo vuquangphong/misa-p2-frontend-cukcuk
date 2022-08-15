@@ -13,7 +13,7 @@
       </div>
 
       <div class="form-body">
-        <div class="form-panel-container">
+        <div class="x-form-panel-container">
           <div class="form-panel">
             <div class="tab-bar">
               <div
@@ -32,7 +32,7 @@
             </div>
 
             <div class="main-body-container">
-              <div class="main-body-general" v-show="isGeneralTab">
+              <div class="x-main-body-general" v-show="isGeneralTab">
                 <div class="list-input-container">
                   <div class="list-input">
                     <div class="x-field food-name">
@@ -638,12 +638,24 @@
       </div>
     </div>
 
+    <!-- DuplicatedMessage for Food -->
     <DuplicatedMessage
       :isAlert="isAlertDuplicatedCode"
       :currentCode="formInfo.FoodCode"
       :model="'món ăn'"
       :isCode="true"
       @closeMessage="isAlertDuplicatedCode = false"
+    />
+
+    <!-- DuplicatedMessage for FS -->
+    <DuplicatedFavorService
+      :isAlert="isAlertDuplicatedCode"
+      :listFS="currentFSsDuplicated"
+      :isNoContent="isNoContent"
+      @closeMessage="
+        isAlertDuplicatedCode = false;
+        isNoContent = false;
+      "
     />
 
     <AlertChangedData
@@ -675,6 +687,7 @@
 
 <script>
 import DuplicatedMessage from "./DuplicatedMessage.vue";
+import DuplicatedFavorService from "./DuplicatedFavorService.vue";
 import { resourceCukcuk } from "@/utils/resourceCukcuk";
 import { mapActions, mapGetters } from "vuex";
 import { enumCukcuk } from "@/utils/enumCukcuk";
@@ -689,7 +702,9 @@ import {
   genCode_3,
   genCode_1,
   genCode_2,
-  filterFavorService,
+  filterEmptyFavorService,
+  listDuplicatedFS,
+  isNoContentInFS,
 } from "@/utils/commonFunc";
 import AddGroupForm from "./AddGroupForm.vue";
 import AddUnitForm from "./AddUnitForm.vue";
@@ -700,6 +715,7 @@ import BaseFavorServiceRow from "../../components/base/BaseFavorServiceRow.vue";
 export default {
   components: {
     DuplicatedMessage,
+    DuplicatedFavorService,
     AddGroupForm,
     AddUnitForm,
     AddPlaceForm,
@@ -777,6 +793,8 @@ export default {
       alertInterrupt: false,
       currentCodeForUpdate: "",
       isAlertDuplicatedCode: false,
+      currentFSsDuplicated: "",
+      isNoContent: false,
 
       isEmptyName: false,
       isEmptyCode: false,
@@ -1230,65 +1248,80 @@ export default {
 
       cur.alertInterrupt = false;
 
-      // TODO: Get the final list of Favorite services
-      let tempFavorServices = filterFavorService(cur.currentFavorService);
-
-      // TODO: Append list of Favorite service into formPost
-
-      // TODO: (just for UPDATE) Get the final list of FavorServiceIDs need to be delete in the intermediate table
-      let tempDelFavorServiceIds = [];
-
-      // TODO: (just for UPDATE) Append this list into formPost
-
-      let formPost = {
-        FoodName: cur.formInfo.FoodName,
-        FoodCode: cur.formInfo.FoodCode,
-        FoodGroupID: cur.formInfo.FoodGroup.ID,
-        FoodUnitID: cur.formInfo.FoodUnit.ID,
-        FoodPrice: filterToMoney(cur.formInfo.FoodPrice),
-        FoodInvest: filterToMoney(cur.formInfo.FoodInvest),
-        Description: cur.formInfo.Description,
-        FoodPlaceID: cur.formInfo.FoodPlace.ID,
-        Appear: cur.formInfo.Appear,
-        FavorServices: tempFavorServices,
-        DelFavorServiceIds: tempDelFavorServiceIds,
-      };
+      // Get the (init) list of Favorite services remove all empty FS
+      let tempFavorServices = filterEmptyFavorService(cur.currentFavorService);
 
       // Validate Compulsory fields
       requireFoodFields.forEach((field) => {
-        if (!formPost[`Food${field}`]) {
+        if (
+          !cur.formInfo[`Food${field}`] ||
+          (field === "Price" && cur.formInfo.FoodPrice === "0")
+        ) {
           cur[`isEmpty${field}`] = true;
           cur.alertInterrupt = true;
         }
       });
 
-      if (cur.alertInterrupt) return;
+      if (cur.alertInterrupt) {
+        cur.isGeneralTab = true;
+        return;
+      }
 
       // Check if FoodCode is duplicated
       if (cur.modeAction === enumCukcuk.modeAction.put) {
-        if (formPost.FoodCode !== this.currentCodeForUpdate) {
-          if (await cur.isDuplicatedCode(formPost.FoodCode)) {
+        if (cur.formInfo.FoodCode !== this.currentCodeForUpdate) {
+          if (await cur.isDuplicatedCode(cur.formInfo.FoodCode)) {
             cur.alertInterrupt = true;
             cur.isAlertDuplicatedCode = true;
+            cur.isGeneralTab = true;
             return;
           }
         }
       } else {
-        if (await cur.isDuplicatedCode(formPost.FoodCode)) {
+        if (await cur.isDuplicatedCode(cur.formInfo.FoodCode)) {
           cur.alertInterrupt = true;
           cur.isAlertDuplicatedCode = true;
+          cur.isGeneralTab = true;
           return;
         }
       }
 
-      // TODO: Validate list of FavorServices if it is not empty
-      // Duplicated FavorServices
-      // FavorService has a surcharge but no content
-      // [...]
+      // Validate list of FavorServices
+      // 1. FavorService has a surcharge but no content
+      if (isNoContentInFS(tempFavorServices)) {
+        cur.isNoContent = true;
+        cur.alertInterrupt = true;
+        cur.isAlertDuplicatedCode = true;
+        return;
+      }
+
+      // 2. Duplicated FavorServices
+      let listOfDuplicatedFS = listDuplicatedFS(tempFavorServices);
+      if (listOfDuplicatedFS.length > 0) {
+        cur.currentFSsDuplicated = listOfDuplicatedFS
+          .map((i) => i.Content + " - " + i.Surcharge)
+          .join(", ");
+        cur.alertInterrupt = true;
+        cur.isAlertDuplicatedCode = true;
+        return;
+      }
 
       // Everything is Okay
       try {
         cur.controlLoader();
+
+        let formPost = {
+          FoodName: cur.formInfo.FoodName,
+          FoodCode: cur.formInfo.FoodCode,
+          FoodGroupID: cur.formInfo.FoodGroup.ID,
+          FoodUnitID: cur.formInfo.FoodUnit.ID,
+          FoodPrice: filterToMoney(cur.formInfo.FoodPrice),
+          FoodInvest: filterToMoney(cur.formInfo.FoodInvest),
+          Description: cur.formInfo.Description,
+          FoodPlaceID: cur.formInfo.FoodPlace.ID,
+          Appear: cur.formInfo.Appear,
+          FavorServices: tempFavorServices,
+        };
 
         if (cur.modeAction === enumCukcuk.modeAction.post) {
           const res = await createMasterDetail(
@@ -1308,33 +1341,6 @@ export default {
             cur.alertInterrupt = false;
           }
         } else {
-          // Actually this place of processing has not been correct
-          // if (cur.isCurrentFavorChanging) {
-          //   let textFavorService;
-
-          //   if (cur.currentFavorService.length > 0) {
-          //     // textFavorService = concatObject(cur.currentFavorService);
-          //   } else {
-          //     textFavorService = "";
-          //   }
-
-          //   res = await updateFullModelById(
-          //     "v1",
-          //     "Foods",
-          //     formPost,
-          //     cur.currentFood.FoodID,
-          //     textFavorService
-          //   );
-          // } else {
-          //   console.log("không hề update favor");
-          //   res = await updateModelById(
-          //     "v1",
-          //     "Foods",
-          //     cur.currentFood.FoodID,
-          //     formPost
-          //   );
-          // }
-
           const res = await updateMasterDetailById(
             "v1",
             "Foods",
@@ -1642,784 +1648,5 @@ export default {
 </script>
 
 <style scoped>
-.form-detail-container {
-  z-index: 11;
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  background-color: rgba(10, 10, 10, 0.4);
-}
-
-.form-detail {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  height: 545px;
-  min-height: 545px;
-  max-height: 545px;
-  width: 740px;
-  max-width: 740px;
-  min-width: 740px;
-  background-color: #fff;
-  border: 5px solid #0072bc;
-}
-
-input.number {
-  text-align: right;
-}
-
-.form-header {
-  width: 100%;
-  height: 20px;
-  background-color: #0072bc;
-  border-bottom: 5px solid #0072bc;
-}
-
-.form-header-inside {
-  padding: 3px 4px 1px 4px;
-  display: flex;
-}
-
-.form-title {
-  font-size: 13px;
-  color: #fff;
-  flex: 1;
-}
-
-.form-close-btn {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.form-close-btn .close-icon {
-  background-color: transparent;
-  opacity: 1;
-  overflow: hidden;
-  width: 16px;
-  height: 16px;
-  background-image: url("https://cdn2-new.cukcuk.vn/QLNH/resources/images/tools/tool-sprites.png");
-  margin: 0;
-  cursor: pointer;
-}
-
-.form-body {
-  width: 100%;
-}
-
-.form-body .form-panel-container {
-  padding: 8px;
-  height: 463px;
-}
-
-.form-panel {
-  width: 100%;
-  height: 100%;
-}
-
-.form-panel .tab-bar {
-  width: 100%;
-  height: 29px;
-  background-color: #f2f2f2;
-  display: flex;
-  font-size: 13px;
-}
-
-.generalTab,
-.favorServiceTab {
-  cursor: pointer;
-  padding: 5px 8px;
-  border-top: 2px solid transparent;
-  border-left: 1px solid transparent;
-  border-right: 1px solid transparent;
-}
-
-.generalTab:hover,
-.favorServiceTab:hover {
-  background-color: rgba(127, 199, 227, 0.4);
-  border-top: 2px solid #005082;
-  border-right: 1px solid #ccc;
-}
-
-.tab-bar .selected {
-  background-color: #fff;
-  color: #0072bc;
-  border-top: 2px solid #0072bc;
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-}
-
-.main-body-container {
-  padding-top: 4px;
-  height: 100%;
-}
-
-.main-body-general {
-  display: flex;
-  padding-top: 12px;
-}
-
-.list-input-container {
-  padding-right: 8px;
-  width: 506px;
-}
-
-.x-field {
-  height: 24px;
-  margin-bottom: 5px;
-  display: flex;
-}
-
-.x-field .label-input {
-  font-size: 13px;
-  width: 125px;
-}
-
-.label-input-inside {
-  padding: 4px 5px 0 0;
-}
-
-.x-field .label-input span.required {
-  color: red;
-}
-
-.x-field .input {
-  height: 100%;
-  flex: 1;
-}
-
-.food-invest .input,
-.food-price .input {
-  max-width: 115px;
-}
-
-.x-field.description {
-  height: 50px;
-}
-
-.x-field.description .input {
-  border-width: 1px;
-  border-style: solid;
-  border-color: #c1c1c1 #d9d9d9 #d9d9d9;
-}
-
-.x-field.description .input.focus {
-  border-color: #0071c1;
-}
-
-.x-field.description .input .textArea {
-  padding: 3px 5px 3px;
-}
-
-.description textarea {
-  min-height: 48px;
-  color: #000;
-  padding: 0;
-  outline: none;
-  font-size: 12px;
-  border: none;
-  border-radius: 0;
-  display: block;
-  background: repeat-x 0 0;
-  width: 100%;
-  resize: none;
-}
-
-.form-body .form-footer {
-  height: 25px;
-  padding: 8px;
-}
-
-.form-buttons {
-  width: 100%;
-  height: 100%;
-  display: flex;
-}
-
-.right-buttons {
-  flex: 1;
-  display: flex;
-  justify-content: right;
-}
-
-.form-buttons .button,
-.panel-button .button {
-  cursor: pointer;
-  border: 1px solid #ccc;
-  padding: 3px;
-  background-color: #fcfcfc;
-}
-
-.form-buttons .button:hover,
-.panel-button .button:hover {
-  border-color: #0071c1;
-  background-image: -webkit-linear-gradient(top, #eff0ee, #eff2e9);
-}
-
-.form-buttons .button:focus-visible,
-.panel-button .button:focus-visible {
-  background-image: -webkit-linear-gradient(top, #eff0ee, #eff2e9);
-  outline: none;
-  border-color: #0071c1;
-}
-
-.help-btn {
-  width: 67px;
-  display: flex;
-  justify-content: center;
-  align-content: center;
-}
-
-.store-btn {
-  width: 86px;
-  display: flex;
-  justify-content: center;
-  align-content: center;
-}
-
-.store-add-btn {
-  width: 123px;
-  display: flex;
-  justify-content: center;
-  align-content: center;
-}
-
-.cancel-btn {
-  width: 91px;
-  display: flex;
-  justify-content: center;
-  align-content: center;
-}
-
-.form-buttons .icon {
-  width: 16px;
-  height: 16px;
-  background-image: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/IconSprite.png");
-  background-color: transparent;
-  background-repeat: no-repeat;
-  display: inline-block;
-}
-
-.form-buttons .title,
-.panel-button .title {
-  font-size: 12px;
-  padding: 0.5px 5px 0 5px;
-  display: flex;
-  align-items: center;
-}
-
-.help-btn .icon {
-  background-position: 0 -1600px;
-}
-
-.store-btn .icon {
-  background-image: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/Save16.png");
-  margin-top: 1px;
-}
-
-.store-add-btn .icon {
-  background-image: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/SaveAdd16.png");
-}
-
-.cancel-btn .icon {
-  background-image: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/Disable16.png");
-  margin-top: 0.5px;
-}
-
-.right-buttons .button {
-  margin-left: 8px;
-}
-
-.avatar-container {
-  width: calc(100% - 514px);
-}
-
-fieldset {
-  padding: 0px 8px 8px;
-  border: 1px solid #afafaf;
-  height: 185px;
-  position: relative;
-}
-
-.fieldset-header {
-  position: absolute;
-  top: -11px;
-  left: 8px;
-  padding: 0 3px 1px;
-  line-height: 16px;
-  color: #000;
-  font-size: 13px;
-  font-weight: normal;
-  background-color: #fff;
-}
-
-.fieldset-header .title {
-  padding: 1px 0;
-}
-
-.fieldset-body {
-  display: flex;
-  width: 100%;
-  margin-top: 12px;
-}
-
-.fieldset-body .panel-default {
-  width: 160px;
-  margin-right: 4px;
-  position: relative;
-}
-
-.panel-default .theme {
-  padding-bottom: 8px;
-}
-
-.panel-default img {
-  height: 120px;
-  width: 160px;
-}
-
-.panel-default .guide {
-  text-align: center;
-  font-size: 12px;
-}
-
-.panel-default .guide div + div {
-  padding-top: 2px;
-  font-weight: bold;
-}
-
-.panel-default .select-icon {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 110px;
-  height: 25px;
-}
-
-.select-icon-inside {
-  background-color: #fcfcfc;
-  border: 1px solid #ccc;
-  padding: 3px;
-  height: calc(100% - 8px);
-  cursor: pointer;
-}
-
-.select-icon-inside:hover {
-  border-color: #1064a1;
-}
-
-.select-icon-inside .content {
-  display: flex;
-  height: 100%;
-  justify-content: center;
-  align-items: center;
-}
-
-.select-icon-inside .content .icon {
-  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/menu/selectIconMenu.png")
-    no-repeat 3px center;
-  width: 16px;
-  height: 16px;
-}
-
-.select-icon-inside .content .title {
-  font-size: 12px;
-  color: #026b97;
-  font-weight: normal;
-  padding: 0 5px;
-}
-
-.fieldset-body .panel-extend {
-  width: calc(100% - 164px);
-}
-
-.panel-extend .select-img,
-.panel-extend .remove-img {
-  height: 25px;
-  width: 27px;
-  margin-bottom: 4px;
-}
-
-.panel-extend .inside {
-  background-color: #fcfcfc;
-  border: 1px solid #ccc;
-  padding: 3px;
-  text-align: center;
-  color: #000;
-  font-size: 13px;
-  font-weight: normal;
-  height: calc(100% - 8px);
-  cursor: pointer;
-}
-
-.panel-extend .inside:hover {
-  border-color: #0071c1;
-  background-image: -webkit-linear-gradient(top, #eff0ec, #eff2e9);
-}
-
-.remove-img img {
-  width: 11px;
-}
-
-.main-body-favor-service {
-  height: 318px;
-}
-
-.main-body-favor-service .title-food {
-  font-size: 13px;
-  padding-top: 5.8px;
-  padding-bottom: 6px;
-}
-
-.main-body-favor-service .addition-note {
-  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/icon-info32-2.png")
-    no-repeat 0px center;
-  padding-left: 42px;
-  font-size: 13px;
-  font-style: italic;
-  height: 34px;
-  line-height: 17px;
-}
-
-.main-body-favor-service .grid-panel-container {
-  border: 1px solid #c1c1c1;
-  height: 214px;
-  margin-top: 8px;
-  overflow: auto;
-}
-
-.main-body-favor-service .grid-panel {
-  height: calc(100% - 2px);
-  overflow: unset;
-}
-
-.main-body-favor-service span.food-name {
-  font-weight: bold;
-}
-
-table thead {
-  height: 29px;
-  background-color: #ededed;
-}
-
-thead,
-thead th {
-  z-index: 1;
-  position: sticky;
-  top: 0;
-}
-
-table thead th.left {
-  border-right: 1px solid #c1c1c1;
-  width: 482px;
-}
-
-table thead th.rightFlow {
-  border-right: 1px solid #c1c1c1;
-}
-
-table thead th + th {
-  width: 240px;
-}
-
-table thead th {
-  border-bottom: 1px solid #c1c1c1;
-  font-size: 13px;
-  font-weight: normal;
-  color: #000;
-  text-align: center;
-}
-
-table thead th:hover {
-  background-color: #eef6fb;
-}
-
-.grid-header .inside {
-  padding: 7px 10px;
-}
-
-.grid-panel .grid-body {
-  overflow: auto;
-}
-
-table {
-  border-spacing: 0;
-}
-
-table tr {
-  height: 24px;
-  border-bottom: 1px solid #c1c1c1;
-}
-
-.panel-button {
-  padding-top: 5px;
-}
-
-.panel-button .button {
-  margin-right: 5px;
-}
-
-.panel-button .button.cannotDel {
-  opacity: 0.5;
-}
-
-.panel-button .button .add-row-btn,
-.panel-button .button .del-row-btn {
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  height: 17px;
-  width: 92px;
-}
-
-.panel-button .button .icon {
-  background-image: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/IconSprite.png");
-  background-color: transparent;
-  background-repeat: no-repeat;
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-}
-
-.panel-button .add-row-btn .icon {
-  background-position: 0 -2648px;
-}
-
-.panel-button .del-row-btn .icon {
-  background-position: 0 -2680px;
-}
-
-.input-container {
-  height: 24px;
-  display: flex;
-}
-
-.inputLabel {
-  height: calc(100% - 2px);
-  width: 100%;
-  background-color: #fff;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #c1c1c1 #d9d9d9 #d9d9d9;
-  color: #000;
-  font-weight: normal;
-}
-
-.inputLabel.focus {
-  border-color: #0071c1;
-}
-
-.inputLabel.alert {
-  width: calc(100% - 26px);
-  border-color: red;
-}
-
-.inputLabel input {
-  border: none;
-  outline: none;
-  width: calc(100% - 10px);
-  padding: 3px 5px;
-  font-size: 12px;
-  height: 16px;
-}
-
-.required-alert {
-  width: 26px;
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.alert-icon {
-  width: 16px;
-  height: 16px;
-  margin: 0 5px 0 5px;
-  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/images/form/exclamation.png")
-    no-repeat;
-}
-
-.alert-hover {
-  z-index: 1;
-  position: absolute;
-  top: 30px;
-  left: 30px;
-  min-width: 100px;
-  width: 231px;
-}
-
-.alert-hover .icon {
-  width: 16px;
-  height: 16px;
-  margin: 0 5px 0 5px;
-  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/images/form/exclamation.png")
-    no-repeat;
-}
-
-.alert-hover-inside {
-  border-radius: 3px;
-  padding: 7px 2px 7px 2px;
-  border: 1px solid #e1e1e1;
-  background-color: #eaf3fa;
-  display: flex;
-}
-
-.alert-hover .message {
-  font-size: 13px;
-}
-
-.combo-container {
-  display: flex;
-  position: relative;
-}
-
-.expandOption {
-  z-index: 1111;
-  position: absolute;
-  top: 24px;
-  left: 0;
-  width: calc(100% - 2px);
-  height: 300px;
-  max-height: 300px;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #e1e1e1;
-  background: #fff;
-  color: #000;
-  font-size: 13px;
-}
-
-.expandOption.foodPlace {
-  height: auto;
-  max-height: 150px;
-  overflow: auto;
-}
-
-.expandOption.filter {
-  height: auto;
-  max-height: 300px;
-  overflow: auto;
-}
-
-.expandOption.filter.foodPlace {
-  height: auto;
-  max-height: 150px;
-  overflow: auto;
-}
-
-.shadowOption {
-  box-shadow: rgb(136 136 136) 0px 0px 6px;
-  top: 28px;
-  height: 297px;
-  width: 100%;
-  z-index: 1111;
-  position: absolute;
-  left: 0;
-  border-color: transparent;
-}
-
-.option-container {
-  height: 100%;
-  overflow: auto;
-}
-
-.expandOption.foodPlace .option-container {
-  height: auto;
-}
-
-.expandOption .option {
-  line-height: 22px;
-  padding: 0 6px;
-  border: 1px dotted transparent;
-  cursor: pointer;
-}
-
-.expandOption .option:hover {
-  background-color: #d6e8f6;
-  border-color: #d6e8f6;
-}
-
-.comboLabel {
-  display: flex;
-  height: calc(100% - 2px);
-  width: 100%;
-  background-color: #fff;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #c1c1c1 #d9d9d9 #d9d9d9;
-  color: #000;
-  font-weight: normal;
-}
-
-.comboLabel.focus {
-  border-color: #0071c1;
-}
-
-.comboLabel.alert {
-  border-color: red;
-}
-
-.comboLabel input {
-  border: none;
-  outline: none;
-  width: calc(100% - 54px);
-  padding: 3px 5px;
-  font-size: 12px;
-  height: 16px;
-}
-
-.drop-down {
-  background: #fff
-    url("https://cdn2-new.cukcuk.vn/QLNH/resources/images/form/trigger.png")
-    no-repeat 0 center;
-  width: 22px;
-  display: table-cell;
-  vertical-align: top;
-  cursor: pointer;
-}
-
-.add-trigger {
-  background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/add-blue-icon.png")
-    no-repeat center center;
-  display: table-cell;
-  vertical-align: top;
-  cursor: pointer;
-  width: 22px;
-}
-
-.appear-on-menu .input {
-  display: flex;
-  align-items: center;
-}
-
-.x-field .input input.checkbox {
-  background: url("https://cdn2.cukcuk.vn/QLNH/resources/images/form/checkbox.png")
-    no-repeat;
-  width: 15px;
-  height: 15px;
-  outline: none;
-  border: none;
-}
-
-.x-field .input input.checkbox:focus,
-.x-field .input input.checkbox:focus-visible {
-  background-position: -15px 0px;
-}
-
-.x-field .input input.checkbox.notAppear {
-  background-position: 0 -15px;
-}
-
-.x-field .input input.checkbox.notAppear:focus {
-  background-position: -15px -15px;
-}
-
-.x-field .input label {
-  padding-left: 5px;
-  color: #000;
-  font-size: 13px;
-  font-weight: normal;
-}
+@import url('../../styles/food-detail-form.css');
 </style>

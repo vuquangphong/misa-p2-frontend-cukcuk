@@ -8,24 +8,15 @@
       <div class="body">
         <div class="body-inside">
           <div class="icon"></div>
-          <div class="content" v-if="isCode">
-            Mã
-            <span>&lt;{{ currentCode }}&gt;</span>
-            đã tồn tại trong danh sách {{ model }}. Bạn vui lòng kiểm tra lại.
-          </div>
-
-          <div class="content" v-else-if="isFavorService">
-            Sở thích phục vụ
-            <span
-              >&lt;&lt;{{ favorContent }} - {{ favorSurcharge }}&gt;&gt;</span
-            >
-            đã tồn tại. Bạn vui lòng kiểm tra lại.
+          <div class="content" v-if="isNoContent">
+            Sở thích phục vụ không được để trống khi có thu thêm. Bạn vui lòng
+            kiểm tra lại.
           </div>
 
           <div class="content" v-else>
-            {{ model }}
-            <span>&lt;{{ currentCode }}&gt;</span>
-            đã tồn tại.
+            Sở thích phục vụ
+            <span>&lt;{{ listFS }}&gt;</span>
+            đã bị trùng. Bạn vui lòng kiểm tra lại.
           </div>
         </div>
       </div>
@@ -46,15 +37,7 @@
 <script>
 import { resourceCukcuk } from "@/utils/resourceCukcuk";
 export default {
-  props: [
-    "isAlert",
-    "currentCode",
-    "model",
-    "isCode",
-    "isFavorService",
-    "favorContent",
-    "favorSurcharge",
-  ],
+  props: ["isAlert", "listFS", "isNoContent"],
 
   data() {
     return {

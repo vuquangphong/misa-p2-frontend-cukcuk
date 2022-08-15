@@ -298,7 +298,7 @@ export default {
 
       let formPost = {
         Content: cur.formInfo.Content,
-        Surcharge: cur.formInfo.Surcharge,
+        Surcharge: filterToMoney(cur.formInfo.Surcharge),
       };
 
       // Validate Compulsory fields
@@ -356,7 +356,7 @@ export default {
      */
     isDuplicatedFavor(content, surcharge) {
       let tempContent = content.toLowerCase();
-      let tempSurcharge = filterToMoney(surcharge);
+      let tempSurcharge = surcharge;
 
       for (const item of this.allFavorService) {
         if (

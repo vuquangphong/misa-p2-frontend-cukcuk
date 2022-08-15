@@ -139,12 +139,12 @@ export const clickOutside = {
  * Author: VQPhong (10/08/2022)
  * Ignore favorite services which are empty (Content: "", Surcharge: 0) from list of Favorite service
  */
-export const filterFavorService = (arr) => {
-    if (arr === []) return [];
+export const filterEmptyFavorService = (listFS) => {
+    if (listFS === []) return [];
 
     let res = [];
 
-    for (const item of arr) {
+    for (const item of listFS) {
         if (!item.Content && (item.Surcharge === 0 || item.Surcharge === '0')) {
             continue;
         } else {
@@ -153,4 +153,55 @@ export const filterFavorService = (arr) => {
     }
 
     return res;
+}
+
+/**
+ * Author: VQPhong (14/08/2022)
+ * Check if list of favorite services contains element that has no content but Surcharge
+ */
+export const isNoContentInFS = (listFS) => {
+    if (listFS === []) return false;
+
+    return listFS.some(i => !i.Content && i.Surcharge !== '0' && i.Surcharge > 0 && i.Surcharge !== null);
+}
+
+/**
+ * Author: VQPhong (12/08/2022)
+ * Return a list of FS which are duplicated
+ */
+export const listDuplicatedFS = (listFS) => {
+    if (listFS === []) return [];
+
+    let res = [];
+    let tempListFS = listFS.sort(sortFavorService);
+
+    for (let i = 1; i < tempListFS.length; i++) {
+        if (sortFavorService(tempListFS[i - 1], tempListFS[i]) === 0) {
+            if (!res.includes(tempListFS[i])) {
+                res.push(tempListFS[i]);
+            }
+        }
+    }
+
+    return res;
+}
+
+/**
+ * Author: VQPhong (12/08/2022)
+ * Function for custom sort for FS 
+ */
+export const sortFavorService = (a, b) => {
+    if (a.Content.toUpperCase() < b.Content.toUpperCase()) {
+        return -1;
+    } else if (a.Content.toUpperCase() > b.Content.toUpperCase()) {
+        return 1;
+    } else {
+        if (filterToMoney(a.Surcharge) < filterToMoney(b.Surcharge)) {
+            return -1;
+        } else if (filterToMoney(a.Surcharge) > filterToMoney(b.Surcharge)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 }
