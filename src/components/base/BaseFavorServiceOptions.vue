@@ -6,6 +6,7 @@
       top: coordinateOptionFS.clientY,
       left: coordinateOptionFS.clientX,
     }"
+    v-click-outside="eventClickOutside"
   >
     <div class="list-option-container">
       <div class="grid-view">
@@ -53,6 +54,7 @@ export default {
       "isFSOptionsOpen",
       "coordinateOptionFS",
       "currentFavorService",
+      "isClickDropDownFS"
     ]),
   },
 
@@ -87,7 +89,18 @@ export default {
       this.closeFSOptions();
     },
 
-    ...mapActions(["openFSOptions", "closeFSOptions"]),
+    /**
+     * Author: VQPhong (22/08/2022)
+     */
+    eventClickOutside() {
+      if (this.isClickDropDownFS) {
+        this.changeIsClickDropDownFS(false);
+      } else {
+        this.closeFSOptions();
+      }
+    },
+
+    ...mapActions(["openFSOptions", "closeFSOptions", "changeIsClickDropDownFS"]),
   },
 };
 </script>

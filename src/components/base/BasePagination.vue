@@ -184,9 +184,14 @@ export default {
      */
     submitPageIndex(event) {
       event.preventDefault();
-      if (this.tempPageIndex > 0 && this.tempPageIndex <= this.totalPages) {
-        this.changePageIndex(this.tempPageIndex);
+
+      if (this.tempPageIndex <= 0) {
+        this.tempPageIndex = 1;
+      } else if (this.tempPageIndex > this.totalPages) {
+        this.tempPageIndex = this.totalPages;
       }
+
+      this.changePageIndex(this.tempPageIndex);
     },
 
     /**
@@ -316,12 +321,10 @@ export default {
 }
 
 .changePage.disabled {
-  opacity: 0.5;
-}
-
-.changePage.disabled {
   border-color: transparent;
   background-color: transparent;
+  opacity: 0.5;
+  cursor: auto;
 }
 
 .changePage .icon {

@@ -112,6 +112,8 @@ export default {
      * Event to open favorite service options
      */
     eventOpenFavorOption() {
+      this.changeIsClickDropDownFS(true);
+      
       // Change coordinate of OptionFS
       let tempRect = this.$refs.flagCoordinateFS.getBoundingClientRect();
 
@@ -150,7 +152,8 @@ export default {
       "openFavorServiceForm",
       "changeCoordinateOptionFS",
       "openFSOptions",
-      "closeFSOptions"
+      "closeFSOptions",
+      "changeIsClickDropDownFS",
     ]),
   },
 };

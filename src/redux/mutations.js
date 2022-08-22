@@ -59,6 +59,10 @@ export default {
         state.isFSOptionsOpen = isFSOptionsOpen;
     },
 
+    setIsClickDropDownFS(state, isClickDropDownFS) {
+        state.isClickDropDownFS = isClickDropDownFS;
+    },
+
     setCurrentTotalNumberFood(state, currentTotalNumberFood) {
         state.currentTotalNumberFood = currentTotalNumberFood;
     },

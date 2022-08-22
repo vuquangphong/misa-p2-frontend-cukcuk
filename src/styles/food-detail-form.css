@@ -419,17 +419,17 @@ fieldset {
     width: 11px;
 }
 
-.main-body-favor-service {
+.x-main-body-favor-service {
     height: 318px;
 }
 
-.main-body-favor-service .title-food {
+.x-main-body-favor-service .title-food {
     font-size: 13px;
     padding-top: 5.8px;
     padding-bottom: 6px;
 }
 
-.main-body-favor-service .addition-note {
+.x-main-body-favor-service .addition-note {
     background: url("https://cdn2-new.cukcuk.vn/QLNH/resources/Image/icon-info32-2.png") no-repeat 0px center;
     padding-left: 42px;
     font-size: 13px;
@@ -438,19 +438,19 @@ fieldset {
     line-height: 17px;
 }
 
-.main-body-favor-service .grid-panel-container {
+.x-main-body-favor-service .grid-panel-container {
     border: 1px solid #c1c1c1;
     height: 214px;
     margin-top: 8px;
     overflow: auto;
 }
 
-.main-body-favor-service .grid-panel {
+.x-main-body-favor-service .grid-panel {
     height: calc(100% - 2px);
     overflow: unset;
 }
 
-.main-body-favor-service span.food-name {
+.x-main-body-favor-service span.food-name {
     font-weight: bold;
 }
 

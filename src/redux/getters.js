@@ -17,6 +17,7 @@ export default {
     isFavorServiceFormOpen: state => state.isFavorServiceFormOpen,
     coordinateOptionFS: state => state.coordinateOptionFS,
     isFSOptionsOpen: state => state.isFSOptionsOpen,
+    isClickDropDownFS: state => state.isClickDropDownFS,
 
     foodGroup: state => state.foodGroup,
     foodUnit: state => state.foodUnit,

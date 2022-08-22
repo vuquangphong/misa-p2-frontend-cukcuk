@@ -534,7 +534,7 @@
                 </div>
               </div>
 
-              <div class="main-body-favor-service" v-show="!isGeneralTab">
+              <div class="x-main-body-favor-service" v-show="!isGeneralTab">
                 <div class="title-food">
                   <span class="label">Món ăn:&nbsp;</span>
                   <span class="food-name">{{ formInfo.FoodName }}</span>
@@ -821,6 +821,7 @@ export default {
 
       timeoutFoodName: null,
       timeoutOpenForm: null,
+      timeoutStoreAndAdd: null,
 
       isClickDropdownGroup: false,
       isClickDropdownUnit: false,
@@ -1235,7 +1236,11 @@ export default {
         this.isGeneralTab = true;
         this.emptyCurrentFavorService();
         this.stopModify();
-        this.$refs.firstInput.focus();
+
+        clearTimeout(this.timeoutStoreAndAdd);
+        this.timeoutStoreAndAdd = setTimeout(() => {
+          this.$refs.firstInput.focus();
+        }, 100);
       }
     },
 
@@ -1254,8 +1259,9 @@ export default {
       // Validate Compulsory fields
       requireFoodFields.forEach((field) => {
         if (
-          !cur.formInfo[`Food${field}`] ||
-          (field === "Price" && cur.formInfo.FoodPrice === "0")
+          (field !== "UnitID" && !cur.formInfo[`Food${field}`]) ||
+          (field === "Price" && cur.formInfo.FoodPrice === "0") ||
+          (field === "UnitID" && !cur.formInfo.FoodUnit.ID)
         ) {
           cur[`isEmpty${field}`] = true;
           cur.alertInterrupt = true;
@@ -1648,5 +1654,5 @@ export default {
 </script>
 
 <style scoped>
-@import url('../../styles/food-detail-form.css');
+@import url("../../styles/food-detail-form.css");
 </style>

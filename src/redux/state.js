@@ -21,6 +21,7 @@ export default {
         indexOfRow: '',
     },
     isFSOptionsOpen: false,
+    isClickDropDownFS: false,
 
     foodGroup: [],
     foodUnit: [],

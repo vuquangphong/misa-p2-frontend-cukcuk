@@ -120,6 +120,10 @@ export default {
         commit('setIsFSOptionsOpen', false);
     },
 
+    changeIsClickDropDownFS({ commit }, payload) {
+        commit('setIsClickDropDownFS', payload);
+    },
+
     changeCurrentTotalNumberFood({ commit }, payload) {
         commit('setCurrentTotalNumberFood', payload);
     },

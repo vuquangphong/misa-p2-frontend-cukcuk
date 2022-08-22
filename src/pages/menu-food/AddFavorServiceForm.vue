@@ -198,13 +198,13 @@ export default {
 
       if (!value) {
         cur.clearForm();
+      } else {
+        clearTimeout(cur.timeout);
+
+        cur.timeout = setTimeout(() => {
+          cur.$refs.firstInput.focus();
+        }, 100);
       }
-
-      clearTimeout(cur.timeout);
-
-      cur.timeout = setTimeout(() => {
-        cur.$refs.firstInput.focus();
-      }, 100);
 
       cur.isEmptyName = false;
     },
