@@ -496,10 +496,7 @@
                     <div class="fieldset-body">
                       <div class="panel-default">
                         <div class="theme">
-                          <img
-                            src="https://misatest06.cukcuk.vn/Handler/ImageHandler.ashx?FileType=1&IsTemp=True&W=160&H=120&IsFit=true"
-                            alt=""
-                          />
+                          <img :src="avatarLink" alt="" />
                         </div>
                         <div class="guide">
                           <div>{{ guideAvatar1 }}</div>
@@ -516,9 +513,15 @@
                       </div>
                       <div class="panel-extend">
                         <div class="select-img">
-                          <div class="inside" @click="noFunction">
-                            <div>...</div>
-                          </div>
+                          <label for="file-upload" class="inside"
+                            >&nbsp;...&nbsp;</label
+                          >
+                          <input
+                            id="file-upload"
+                            type="file"
+                            accept="image/*"
+                            @change="uploadImage"
+                          />
                         </div>
 
                         <div class="remove-img">
@@ -642,18 +645,18 @@
     <DuplicatedMessage
       :isAlert="isAlertDuplicatedCode"
       :currentCode="formInfo.FoodCode"
-      :model="'món ăn'"
       :isCode="true"
+      :model="'món ăn'"
       @closeMessage="isAlertDuplicatedCode = false"
     />
 
     <!-- DuplicatedMessage for FS -->
     <DuplicatedFavorService
-      :isAlert="isAlertDuplicatedCode"
+      :isAlert="isAlertDuplicatedOrNoContentFS"
       :listFS="currentFSsDuplicated"
       :isNoContent="isNoContent"
       @closeMessage="
-        isAlertDuplicatedCode = false;
+        isAlertDuplicatedOrNoContentFS = false;
         isNoContent = false;
       "
     />
@@ -692,9 +695,9 @@ import { resourceCukcuk } from "@/utils/resourceCukcuk";
 import { mapActions, mapGetters } from "vuex";
 import { enumCukcuk } from "@/utils/enumCukcuk";
 import { reactive, toRefs } from "vue";
-import { createMasterDetail } from "@/utils/call_apis/Post";
+import { createMasterDetail, createModel } from "@/utils/call_apis/Post";
 import { updateMasterDetailById } from "@/utils/call_apis/Put";
-import { requireFoodFields } from "@/utils/constants";
+import { avatarDefault, host, requireFoodFields } from "@/utils/constants";
 import { getById, getCheckDuplicatedCode } from "@/utils/call_apis/Get";
 import {
   filterFromMoney,
@@ -744,6 +747,7 @@ export default {
           ID: "",
         },
         Appear: enumCukcuk.appearOnMenu.appear,
+        Avatar: "",
       },
     });
 
@@ -768,6 +772,8 @@ export default {
 
   data() {
     return {
+      avatarLink: avatarDefault,
+
       alertRequired: resourceCukcuk.VI.message.alertRequired,
       formTitleAdd: resourceCukcuk.VI.formLabels.titleFormAdd,
       formTitleUpdate: resourceCukcuk.VI.formLabels.titleFormUpdate,
@@ -793,6 +799,7 @@ export default {
       alertInterrupt: false,
       currentCodeForUpdate: "",
       isAlertDuplicatedCode: false,
+      isAlertDuplicatedOrNoContentFS: false,
       currentFSsDuplicated: "",
       isNoContent: false,
 
@@ -1135,6 +1142,7 @@ export default {
 
       // Check if required field is empty
       if (required) {
+        this.formInfo[`Food${field}`] = this.formInfo[`Food${field}`].toString().trim();
         if (!this.formInfo[`Food${field}`]) {
           this[`isEmpty${field}`] = true;
         }
@@ -1297,7 +1305,7 @@ export default {
       if (isNoContentInFS(tempFavorServices)) {
         cur.isNoContent = true;
         cur.alertInterrupt = true;
-        cur.isAlertDuplicatedCode = true;
+        cur.isAlertDuplicatedOrNoContentFS = true;
         return;
       }
 
@@ -1308,7 +1316,7 @@ export default {
           .map((i) => i.Content + " - " + i.Surcharge)
           .join(", ");
         cur.alertInterrupt = true;
-        cur.isAlertDuplicatedCode = true;
+        cur.isAlertDuplicatedOrNoContentFS = true;
         return;
       }
 
@@ -1452,6 +1460,8 @@ export default {
             cur.formInfo[key] = res.data.responseData[key];
           }
         });
+
+        cur.avatarLink = cur.formInfo.Avatar ? cur.formInfo.Avatar : avatarDefault;
 
         this.isBindingLocalGroup = true;
         this.isBindingLocalUnit = true;
@@ -1636,6 +1646,39 @@ export default {
         this.isChangedDataOpen = true;
       } else {
         this.closeFormDetail();
+      }
+    },
+
+    /**
+     * Author: VQPhong (23/08/2022)
+     * Upload image when select image from device
+     */
+    async uploadImage(event) {
+      console.log(event);
+      
+      // Create image form data
+      const image = event.target.files[0];
+      const formImage = new FormData();
+      formImage.append("image", image, image.name);
+
+      try {
+        this.controlLoader();
+
+        const res = await createModel("v1", "Files/Images", formImage);
+
+        if (
+          res.data.customStatusCode === enumCukcuk.customizeStatusCode.created
+        ) {
+          this.avatarLink = `${host}${res.data.responseData}`;
+          this.formInfo.Avatar = this.avatarLink;
+        } else {
+          alert(res.data.responseData.userMsg);
+        }
+
+        this.controlLoader();
+      } catch (err) {
+        this.controlLoader();
+        alert(this.alertErrorMsg);
       }
     },
 

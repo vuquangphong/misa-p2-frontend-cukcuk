@@ -21,7 +21,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :field="'Code'" @search="getFoodPaging" />
+                  <BaseFilterHeader :field="'Code'" @search="searchData" />
                 </div>
               </div>
             </th>
@@ -32,7 +32,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :field="'Name'" @search="getFoodPaging" />
+                  <BaseFilterHeader :field="'Name'" @search="searchData" />
                 </div>
               </div>
             </th>
@@ -43,7 +43,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :field="'Group'" @search="getFoodPaging" />
+                  <BaseFilterHeader :field="'Group'" @search="searchData" />
                 </div>
               </div>
             </th>
@@ -54,7 +54,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :field="'Unit'" @search="getFoodPaging" />
+                  <BaseFilterHeader :field="'Unit'" @search="searchData" />
                 </div>
               </div>
             </th>
@@ -65,7 +65,7 @@
               </div>
               <div class="filter-th">
                 <div class="filter-th-container">
-                  <BaseFilterHeader :isFilterPrice="true" :field="'Price'" @search="getFoodPaging" />
+                  <BaseFilterHeader :isFilterPrice="true" :field="'Price'" @search="searchData" />
                 </div>
               </div>
             </th>
@@ -364,6 +364,11 @@ export default {
         alert(cur.errorUserMsg);
         console.log(err);
       }
+    },
+
+    async searchData() {
+      this.pageIndex = 1;
+      await this.getFoodPaging();
     },
 
     /**

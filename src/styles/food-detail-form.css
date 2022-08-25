@@ -410,6 +410,10 @@ fieldset {
     cursor: pointer;
 }
 
+.panel-extend input[type="file"] {
+    display: none;
+}
+
 .panel-extend .inside:hover {
     border-color: #0071c1;
     background-image: -webkit-linear-gradient(top, #eff0ec, #eff2e9);

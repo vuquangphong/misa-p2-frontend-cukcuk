@@ -1,4 +1,5 @@
 export const apiUrl = 'http://localhost:33497/api/';
+export const host = 'http://localhost:33497';
 
 export const requireFoodFields = ['Name', 'Code', 'UnitID', 'Price'];
 
@@ -32,4 +33,6 @@ export const vi_enUpperChar = {
     Ù: "U", Ú: "U", Ủ: "U", Ũ: "U", Ụ: "U",
     Ư: "U", Ừ: "U", Ứ: "U", Ử: "U", Ữ: "U", Ự: "U",
     Ỳ: "Y", Ý: "Y", Ỷ: "Y", Ỹ: "Y", Ỵ: "Y",
-}
+};
+
+export const avatarDefault = "https://misatest06.cukcuk.vn/Handler/ImageHandler.ashx?FileType=1&IsTemp=True&W=160&H=120&IsFit=true";
